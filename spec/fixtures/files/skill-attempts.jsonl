@@ -1,0 +1,12 @@
+{"v":1,"id":"0x1505877b/1788611732667/1","t":1788611736.315,"char":"Sif The Dog","serial":"0x1505877b","skill":"Bowcraft","used":"bow","from":32.0,"to":32.1,"outcome":"failed","ok":false,"stock_from":275,"stock_to":268,"consumed":[{"name":"regular boards","graphic":"0x1bd7","hue":0,"qty":7}]}
+{"v":1,"id":"0x1505877b/1788610215114/1","t":1788610234.405,"char":"Sif The Dog","serial":"0x1505877b","skill":"Bowcraft","used":"bow","from":31.1,"to":31.2,"outcome":"made","ok":true,"consumed":[{"name":"regular boards","graphic":"0x1bd7","hue":0,"qty":7}]}
+{"v":1,"id":"0x1505877b/1788627597113/3","t":1788627607.270,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mysticism","used":"Nether Bolt","from":50.1,"to":50.1,"outcome":"fizzled","ok":false}
+{"v":1,"id":"0x1505877b/1788689627575/4","t":1788689641.122,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mysticism","used":"Nether Bolt","from":80.1,"to":null,"outcome":"fizzled","ok":false}
+
+{oops
+{"v":2,"id":"0x1/1/1","t":1.0,"skill":"Magery","used":"Bless","from":1.0,"to":1.0,"outcome":"cast","ok":true}
+{"v":1,"id":"0x1/1/2","t":1.0,"skill":"Magery","used":"Bless","to":1.0,"outcome":"cast","ok":true}
+{"v":1,"id":"0x1/1/3","t":1.0,"skill":"Taming","used":"Bless","from":1.0,"to":1.0,"outcome":"tamed","ok":true}
+{"v":1,"id":"0x1/1/4","t":1.0,"skill":"Magery","used":"Bless","from":1.0,"to":1.0,"outcome":"throttled","ok":false}
+{"v":1,"id":"0x1505877b/1788611732667/1","t":1788611736.315,"char":"Sif The Dog","serial":"0x1505877b","skill":"Bowcraft","used":"bow","from":32.0,"to":32.1,"outcome":"failed","ok":false,"stock_from":275,"stock_to":268,"consumed":[{"name":"regular boards","graphic":"0x1bd7","hue":0,"qty":7}]}
+{"v":1,"id":"0x1/1/5","t":1.0,"skill":"Magery","from":1.0,"to":1.0,"outcome":"cast","ok":true}
