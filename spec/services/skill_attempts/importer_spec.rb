@@ -4,7 +4,7 @@ RSpec.describe SkillAttempts::Importer do
   let(:path) { file_fixture("skill-attempts.jsonl").to_s }
 
   def import
-    described_class.new(path).call
+    described_class.call(path)
   end
 
   it "imports every readable row once and reports the rest" do
@@ -74,6 +74,6 @@ RSpec.describe SkillAttempts::Importer do
   end
 
   it "refuses a path that does not exist" do
-    expect { described_class.new("/nowhere/nothing.jsonl").call }.to raise_error(ArgumentError, /no such file/)
+    expect { described_class.call("/nowhere/nothing.jsonl") }.to raise_error(ArgumentError, /no such file/)
   end
 end

@@ -1,19 +1,14 @@
-require "json"
-
 module SkillAttempts
   class Importer
+    include Utils::Callable
+
     DEFAULT_PATH = File.expand_path("~/Downloads/TazUO-Launcher.osx-arm64/TazUO/skill-attempts.jsonl")
     VERSION = 1
     REQUIRED = %w[id t skill from to outcome used].freeze
     BATCH_SIZE = 1000
+    SKILL_ALIASES = { "Bowcraft" => "Bowcraft/Fletching", "Fletching" => "Bowcraft/Fletching" }.freeze
 
-    SKILL_ALIASES = {
-      "Bowcraft" => "Bowcraft/Fletching",
-      "Fletching" => "Bowcraft/Fletching"
-    }.freeze
-
-    Result = Struct.new(:imported, :skipped, :problems, keyword_init: true)
-
+    Result = Data.define(:imported, :skipped, :problems)
     class Skipped < StandardError; end
 
     def initialize(path)
@@ -23,48 +18,25 @@ module SkillAttempts
     def call
       raise ArgumentError, "no such file: #{@path}" unless File.file?(@path)
 
-      rows, problems = read_rows
-      imported = 0
-      skipped = 0
-
-      SkillAttempt.transaction do
-        rows.each_slice(BATCH_SIZE) do |batch|
-          fresh = without_existing(batch)
-          skipped += batch.size - fresh.size
-          imported += insert(fresh)
-        end
+      problems = []
+      rows = File.foreach(@path).with_index(1).filter_map do |text, number|
+        parse(text) unless text.strip.empty?
+      rescue Skipped => error
+        problems << "#{@path}:#{number}: #{error.message}"
+        nil
       end
+      rows.uniq! { |row| row["id"] }
 
-      Result.new(imported: imported, skipped: skipped, problems: problems)
+      imported = SkillAttempt.transaction { rows.each_slice(BATCH_SIZE).sum { |batch| insert(batch) } }
+      Result.new(imported:, skipped: rows.size - imported, problems:)
     end
 
     private
 
-    def read_rows
-      rows = []
-      problems = []
-      seen = Set.new
-
-      File.foreach(@path).with_index(1) do |text, number|
-        next if text.strip.empty?
-
-        row = parse(text)
-        next unless seen.add?(row["id"])
-
-        rows << row
-      rescue Skipped => error
-        problems << "#{@path}:#{number}: #{error.message}"
-      end
-
-      [ rows, problems ]
-    end
-
     def parse(text)
       row = JSON.parse(text)
       raise Skipped, "not an object" unless row.is_a?(Hash)
-
-      version = row["v"]
-      raise Skipped, "version #{version.inspect}, this reads version #{VERSION}" unless version == VERSION
+      raise Skipped, "version #{row['v'].inspect}, this reads version #{VERSION}" unless row["v"] == VERSION
 
       missing = REQUIRED.select { |name| row[name].nil? }
       raise Skipped, "no #{missing.join(', ')}" if missing.any?
@@ -78,23 +50,13 @@ module SkillAttempts
       raise Skipped, "not JSON (#{error.message})"
     end
 
-    def without_existing(batch)
-      existing = SkillAttempt.where(external_id: batch.map { |row| row["id"] }).pluck(:external_id).to_set
-
-      batch.reject { |row| existing.include?(row["id"]) }
-    end
-
     def insert(rows)
-      return 0 if rows.empty?
-
       now = Time.current
+      by_id = rows.index_by { |row| row["id"] }
       inserted = SkillAttempt.insert_all(rows.map { |row| attempt_attributes(row, now) }, returning: %w[id external_id])
-      ids = inserted.rows.to_h { |id, external_id| [ external_id, id ] }
-
-      consumed = rows.flat_map { |row| consumed_attributes(row, ids.fetch(row["id"]), now) }
+      consumed = inserted.rows.flat_map { |id, external_id| consumed_attributes(by_id.fetch(external_id), id, now) }
       ConsumedMaterial.insert_all(consumed) if consumed.any?
-
-      rows.size
+      inserted.rows.size
     end
 
     def attempt_attributes(row, now)

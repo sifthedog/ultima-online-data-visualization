@@ -5,7 +5,7 @@ namespace :skill_attempts do
 
     abort "no such file: #{path}" unless File.file?(path)
 
-    result = SkillAttempts::Importer.new(path).call
+    result = SkillAttempts::Importer.call(path)
 
     result.problems.each { |problem| puts "skipped #{problem}" }
     puts "#{result.imported} imported, #{result.skipped} already present -> #{SkillAttempt.count} total"
