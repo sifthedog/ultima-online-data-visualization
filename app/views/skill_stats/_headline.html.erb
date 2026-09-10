@@ -1,0 +1,48 @@
+<section class="space-y-3" data-testid="headline">
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+      <div class="flex items-center gap-1 text-sm text-slate-400">Expected attempts<%= hint_for(:expected_attempts) %></div>
+      <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.expected_attempts) %></p>
+      <p class="text-xs text-slate-500">to travel the covered <%= count(summary.covered_points) %> points</p>
+    </div>
+    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+      <div class="flex items-center gap-1 text-sm text-slate-400">Attempts per skill point<%= hint_for(:attempts_per_point) %></div>
+      <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.attempts_per_point) %></p>
+      <div class="flex items-center gap-1 text-xs text-slate-500">success rate <%= percent(summary.success_rate) %><%= hint_for(:success_rate) %></div>
+    </div>
+    <% if summary.consumption.empty? && summary.gathered.empty? %>
+      <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 sm:col-span-2">
+        <p class="text-sm text-slate-400">Materials</p>
+        <p class="mt-1 text-slate-300">No materials recorded.</p>
+      </div>
+    <% else %>
+      <% summary.consumption.each do |name, total| %>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center gap-1 text-sm text-slate-400">Total <%= name %><%= hint_for(:material_total_consumed) %></div>
+          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= whole(total) %></p>
+          <p class="text-xs text-slate-500">for the covered range</p>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center gap-1 text-sm text-slate-400"><%= name.capitalize %> per skill point<%= hint_for(:material_per_point_consumed) %></div>
+          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.average_consumption[name]) %></p>
+          <p class="text-xs text-slate-500">average over covered points</p>
+        </div>
+      <% end %>
+      <% summary.gathered.each do |name, total| %>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center gap-1 text-sm text-slate-400">Total <%= name %><%= hint_for(:material_total_gathered) %></div>
+          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= whole(total) %></p>
+          <p class="text-xs text-slate-500">gathered in the covered range</p>
+        </div>
+        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+          <div class="flex items-center gap-1 text-sm text-slate-400"><%= name.capitalize %> per swing<%= hint_for(:material_per_swing_gathered) %></div>
+          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.average_yield[name]) %></p>
+          <p class="text-xs text-slate-500">average over swing-covered steps</p>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
+  <% if summary.uncovered_attempts.positive? %>
+    <div class="flex items-center gap-1 text-xs text-slate-500"><%= whole(summary.uncovered_attempts) %> attempts on steps that never recorded a gain are left out of the estimate.<%= hint_for(:uncovered_attempts) %></div>
+  <% end %>
+</section>

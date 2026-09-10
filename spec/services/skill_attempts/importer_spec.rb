@@ -10,9 +10,9 @@ RSpec.describe SkillAttempts::Importer do
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(3)
+    expect { result = import }.to change(SkillAttempt, :count).by(6)
 
-    expect(result.imported).to eq(3)
+    expect(result.imported).to eq(6)
     expect(result.skipped).to eq(0)
     expect(result.problems.size).to eq(7)
     expect(result.problems[0]).to eq("#{path}:4: no to")
@@ -68,9 +68,45 @@ RSpec.describe SkillAttempts::Importer do
 
     result = nil
 
-    expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count ] }
+    expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(3)
+    expect(result.skipped).to eq(6)
+  end
+
+  it "maps a dug mining row with its gathered ore" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/32")
+
+    expect(attempt).to have_attributes(
+      skill: "mining", outcome: "dug", skill_from: 79.0, skill_to: 79.1, subject: "pickaxe"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials.sole).to have_attributes(
+      name: "iron ore", graphic: "0x19b7", hue: 0, quantity: 2
+    )
+  end
+
+  it "leaves a failed mining swing with no materials at all" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/36")
+
+    expect(attempt).to have_attributes(outcome: "failed", skill_from: 79.2, skill_to: 79.2)
+    expect(attempt).not_to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials).to be_empty
+  end
+
+  it "maps a smelting row with both consumed ore and gathered ingots" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/34")
+
+    expect(attempt).to have_attributes(
+      skill: "mining", outcome: "smelted", skill_from: 79.1, skill_to: 79.1, subject: "fire beetle"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials.sole).to have_attributes(name: "iron ore", quantity: 98)
+    expect(attempt.gathered_materials.sole).to have_attributes(name: "98 Ingots", quantity: 49)
   end
 
   it "refuses a path that does not exist" do

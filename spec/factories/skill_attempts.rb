@@ -28,5 +28,21 @@ FactoryBot.define do
       mysticism
       outcome { :fizzled }
     end
+
+    trait :mining do
+      skill { :mining }
+      skill_from { 79.0 }
+      skill_to { 79.1 }
+      outcome { :dug }
+      subject { "pickaxe" }
+    end
+
+    trait :smelted do
+      mining
+      skill_from { 79.1 }
+      skill_to { 79.1 }
+      outcome { :smelted }
+      subject { "fire beetle" }
+    end
   end
 end

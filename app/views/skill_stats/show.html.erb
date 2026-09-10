@@ -1,0 +1,28 @@
+<% content_for :title, "Skill training stats" %>
+
+<header class="space-y-1">
+  <h1 class="text-3xl font-bold tracking-tight">Skill training stats</h1>
+  <p class="text-slate-400">Expected attempts and materials to train a skill through a range, pooled across every recorded macro run.</p>
+</header>
+
+<%= render "form", form: @form %>
+
+<% if !@form.filled? %>
+  <%= render "empty_state" %>
+<% elsif @form.errors.any? %>
+  <section class="rounded-lg border border-rose-900 bg-rose-950/40 p-4 text-rose-200" data-testid="errors">
+    <ul class="list-disc space-y-1 pl-5">
+      <% @form.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </section>
+<% else %>
+  <% summary = @stats.summary %>
+  <%= render "coverage", summary: summary, form: @form %>
+  <% unless summary.empty? %>
+    <%= render "headline", summary: summary %>
+    <%= render "chart", summary: summary %>
+    <%= render "subjects", by_subject: @stats.by_subject if @stats.by_subject.any? %>
+  <% end %>
+<% end %>

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_07_123949) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_10_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -23,6 +23,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_123949) do
     t.bigint "skill_attempt_id", null: false
     t.datetime "updated_at", null: false
     t.index ["skill_attempt_id"], name: "index_consumed_materials_on_skill_attempt_id"
+  end
+
+  create_table "gathered_materials", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.string "graphic"
+    t.integer "hue", default: 0, null: false
+    t.string "name", null: false
+    t.integer "quantity", null: false
+    t.bigint "skill_attempt_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["skill_attempt_id"], name: "index_gathered_materials_on_skill_attempt_id"
   end
 
   create_table "skill_attempts", force: :cascade do |t|
@@ -47,4 +58,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_07_123949) do
   end
 
   add_foreign_key "consumed_materials", "skill_attempts"
+  add_foreign_key "gathered_materials", "skill_attempts"
 end

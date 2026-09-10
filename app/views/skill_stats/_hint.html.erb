@@ -1,0 +1,10 @@
+<%# locals: (text:, align: :left) %>
+<details name="skill-stats-hint" class="relative inline-block align-middle normal-case" data-testid="hint">
+  <summary class="inline-flex h-4 w-4 cursor-pointer list-none items-center justify-center rounded-full border border-slate-600 text-[10px] font-semibold leading-none text-slate-400 hover:border-sky-500 hover:text-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 [&::-webkit-details-marker]:hidden">
+    <span aria-hidden="true">i</span>
+    <span class="sr-only">What does this mean?</span>
+  </summary>
+  <div class="absolute z-20 mt-1 w-56 max-w-[calc(100vw-2rem)] <%= align == :right ? "right-0" : "left-0" %> rounded-md border border-slate-700 bg-slate-800 p-2 text-xs font-normal leading-snug text-slate-200 shadow-lg">
+    <%= text %>
+  </div>
+</details>

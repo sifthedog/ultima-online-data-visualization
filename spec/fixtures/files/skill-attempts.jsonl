@@ -10,3 +10,6 @@
 {"v":1,"id":"0x1/1/4","t":1.0,"skill":"Magery","used":"Bless","from":1.0,"to":1.0,"outcome":"throttled","ok":false}
 {"v":1,"id":"0x1505877b/1788611732667/1","t":1788611736.315,"char":"Sif The Dog","serial":"0x1505877b","skill":"Bowcraft","used":"bow","from":32.0,"to":32.1,"outcome":"failed","ok":false,"stock_from":275,"stock_to":268,"consumed":[{"name":"regular boards","graphic":"0x1bd7","hue":0,"qty":7}]}
 {"v":1,"id":"0x1/1/5","t":1.0,"skill":"Magery","from":1.0,"to":1.0,"outcome":"cast","ok":true}
+{"v":1,"id":"0x1505877b/1789056730585/32","t":1789056821.304,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"pickaxe","from":79.0,"to":79.1,"outcome":"dug","gained":[{"name":"iron ore","graphic":"0x19b7","hue":0,"qty":2}]}
+{"v":1,"id":"0x1505877b/1789056730585/36","t":1789056830.816,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"pickaxe","from":79.2,"to":79.2,"outcome":"failed"}
+{"v":1,"id":"0x1505877b/1789056730585/34","t":1789056826.075,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"fire beetle","from":79.1,"to":79.1,"outcome":"smelted","consumed":[{"name":"iron ore","graphic":"0x19b7","hue":0,"qty":98}],"gained":[{"name":"98 Ingots","graphic":"0x1bf2","hue":0,"qty":49}]}

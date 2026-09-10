@@ -55,7 +55,9 @@ module SkillAttempts
       by_id = rows.index_by { |row| row["id"] }
       inserted = SkillAttempt.insert_all(rows.map { |row| attempt_attributes(row, now) }, returning: %w[id external_id])
       consumed = inserted.rows.flat_map { |id, external_id| consumed_attributes(by_id.fetch(external_id), id, now) }
+      gathered = inserted.rows.flat_map { |id, external_id| gathered_attributes(by_id.fetch(external_id), id, now) }
       ConsumedMaterial.insert_all(consumed) if consumed.any?
+      GatheredMaterial.insert_all(gathered) if gathered.any?
       inserted.rows.size
     end
 
@@ -87,6 +89,20 @@ module SkillAttempts
           graphic: spent["graphic"],
           hue: spent["hue"] || 0,
           quantity: spent["qty"] || 0,
+          created_at: now,
+          updated_at: now
+        }
+      end
+    end
+
+    def gathered_attributes(row, attempt_id, now)
+      Array(row["gained"]).map do |gain|
+        {
+          skill_attempt_id: attempt_id,
+          name: gain["name"].to_s,
+          graphic: gain["graphic"],
+          hue: gain["hue"] || 0,
+          quantity: gain["qty"] || 0,
           created_at: now,
           updated_at: now
         }

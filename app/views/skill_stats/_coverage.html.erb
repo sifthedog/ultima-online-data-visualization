@@ -1,0 +1,25 @@
+<section class="space-y-2" data-testid="coverage">
+  <h2 class="text-xl font-semibold"><%= form.skill_label %> <%= skill_span(summary.from_tenths, summary.to_tenths) %><%= " · #{form.chosen_subject}" if form.chosen_subject %></h2>
+  <% if summary.empty? %>
+    <p class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-slate-300">No attempts recorded for this skill in this range.</p>
+  <% else %>
+    <div class="text-slate-300">
+      <span class="font-medium text-slate-100"><%= whole(summary.covered_steps) %> of <%= whole(summary.total_steps) %></span>
+      steps covered<%= hint_for(:covered_steps) %> (<%= percent(summary.coverage_ratio) %>) from <%= whole(summary.attempts) %> attempts.
+      Figures below count only covered steps.
+    </div>
+    <% if summary.uncovered_ranges.any? %>
+      <div class="flex flex-wrap items-center gap-2 text-sm">
+        <span class="text-slate-500">No data for<%= hint_for(:uncovered_ranges) %></span>
+        <% summary.uncovered_ranges.each do |from_tenths, to_tenths| %>
+          <span class="rounded-full border border-amber-900 bg-amber-950/40 px-2.5 py-0.5 text-amber-200"><%= skill_span(from_tenths, to_tenths) %></span>
+        <% end %>
+      </div>
+    <% end %>
+    <% if summary.gathered.any? && summary.yield_covered_steps != summary.covered_steps %>
+      <div class="text-xs text-slate-500">
+        <%= whole(summary.yield_covered_steps) %> of <%= whole(summary.total_steps) %> steps recorded a swing (<%= percent(summary.yield_coverage_ratio) %>) — used for the gathered figures above.<%= hint_for(:yield_coverage) %>
+      </div>
+    <% end %>
+  <% end %>
+</section>
