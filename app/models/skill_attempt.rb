@@ -8,6 +8,7 @@ class SkillAttempt < ApplicationRecord
     mysticism: "Mysticism",
     magery: "Magery",
     tailoring: "Tailoring",
+    inscription: "Inscription",
     tinkering: "Tinkering",
     mining: "Mining"
   }, validate: true
@@ -22,9 +23,12 @@ class SkillAttempt < ApplicationRecord
   }, validate: true
 
   SUCCESSFUL_OUTCOMES = %w[made cast dug smelted].freeze
+  SKILL_ALIASES = { "Bowcraft" => "Bowcraft/Fletching", "Fletching" => "Bowcraft/Fletching" }.freeze
+
+  def self.normalize_skill(name) = SKILL_ALIASES.fetch(name, name)
 
   validates :external_id, presence: true, uniqueness: true
-  validates :recorded_at, :skill_from, :skill_to, :subject, presence: true
+  validates :recorded_at, :skill_from, :subject, presence: true
 
   scope :successful, -> { where(outcome: SUCCESSFUL_OUTCOMES) }
   scope :unsuccessful, -> { where.not(outcome: SUCCESSFUL_OUTCOMES) }

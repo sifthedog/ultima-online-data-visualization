@@ -4,9 +4,9 @@ module SkillAttempts
 
     DEFAULT_PATH = File.expand_path("~/Downloads/TazUO-Launcher.osx-arm64/TazUO/skill-attempts.jsonl")
     VERSION = 1
-    REQUIRED = %w[id t skill from to outcome used].freeze
+    # "to" is not required: the recorder writes null there when the client had stopped answering
+    REQUIRED = %w[id t skill from outcome used].freeze
     BATCH_SIZE = 1000
-    SKILL_ALIASES = { "Bowcraft" => "Bowcraft/Fletching", "Fletching" => "Bowcraft/Fletching" }.freeze
 
     Result = Data.define(:imported, :skipped, :problems)
     class Skipped < StandardError; end
@@ -41,7 +41,7 @@ module SkillAttempts
       missing = REQUIRED.select { |name| row[name].nil? }
       raise Skipped, "no #{missing.join(', ')}" if missing.any?
 
-      row["skill"] = SKILL_ALIASES.fetch(row["skill"], row["skill"])
+      row["skill"] = SkillAttempt.normalize_skill(row["skill"])
       raise Skipped, "unknown skill #{row['skill'].inspect}" unless SkillAttempt.skills.value?(row["skill"])
       raise Skipped, "unknown outcome #{row['outcome'].inspect}" unless SkillAttempt.outcomes.value?(row["outcome"])
 
@@ -51,17 +51,25 @@ module SkillAttempts
     end
 
     def insert(rows)
-      now = Time.current
       by_id = rows.index_by { |row| row["id"] }
-      inserted = SkillAttempt.insert_all(rows.map { |row| attempt_attributes(row, now) }, returning: %w[id external_id])
-      consumed = inserted.rows.flat_map { |id, external_id| consumed_attributes(by_id.fetch(external_id), id, now) }
-      gathered = inserted.rows.flat_map { |id, external_id| gathered_attributes(by_id.fetch(external_id), id, now) }
+      # insert_all defaults to on_duplicate: :skip, so re-importing a file whose rows already
+      # exist (by the unique external_id index) is a no-op for those rows rather than an error.
+      inserted = SkillAttempt.insert_all(rows.map { |row| attempt_attributes(row) }, returning: %w[id external_id])
+
+      consumed = []
+      gathered = []
+      inserted.rows.each do |id, external_id|
+        row = by_id.fetch(external_id)
+        consumed.concat(material_attributes(row, id, "consumed"))
+        gathered.concat(material_attributes(row, id, "gained"))
+      end
+
       ConsumedMaterial.insert_all(consumed) if consumed.any?
       GatheredMaterial.insert_all(gathered) if gathered.any?
       inserted.rows.size
     end
 
-    def attempt_attributes(row, now)
+    def attempt_attributes(row)
       _serial, run_ms, sequence = row["id"].split("/")
 
       {
@@ -75,36 +83,18 @@ module SkillAttempts
         skill_from: row["from"],
         skill_to: row["to"],
         outcome: row["outcome"],
-        subject: row["used"],
-        created_at: now,
-        updated_at: now
+        subject: row["used"]
       }
     end
 
-    def consumed_attributes(row, attempt_id, now)
-      Array(row["consumed"]).map do |spent|
+    def material_attributes(row, attempt_id, key)
+      Array(row[key]).map do |item|
         {
           skill_attempt_id: attempt_id,
-          name: spent["name"].to_s,
-          graphic: spent["graphic"],
-          hue: spent["hue"] || 0,
-          quantity: spent["qty"] || 0,
-          created_at: now,
-          updated_at: now
-        }
-      end
-    end
-
-    def gathered_attributes(row, attempt_id, now)
-      Array(row["gained"]).map do |gain|
-        {
-          skill_attempt_id: attempt_id,
-          name: gain["name"].to_s,
-          graphic: gain["graphic"],
-          hue: gain["hue"] || 0,
-          quantity: gain["qty"] || 0,
-          created_at: now,
-          updated_at: now
+          name: item["name"].to_s,
+          graphic: item["graphic"],
+          hue: item["hue"] || 0,
+          quantity: item["qty"] || 0
         }
       end
     end
