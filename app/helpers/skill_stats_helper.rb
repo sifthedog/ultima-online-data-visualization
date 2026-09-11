@@ -20,8 +20,6 @@ module SkillStatsHelper
 
   def hint_for(key, align: :left) = render("skill_stats/hint", text: HINTS.fetch(key), align:)
 
-  # The two material sections on the headline (consumed and gathered) render identically,
-  # differing only in which summary fields and copy they pull from.
   def material_sections(summary)
     [
       {
@@ -39,10 +37,8 @@ module SkillStatsHelper
     ]
   end
 
-  # 965 -> "96.5"
   def skill_level(tenths) = format("%.1f", tenths / 10.0)
 
-  # 965, 970 -> "96.5–97.0"
   def skill_span(from_tenths, to_tenths) = "#{skill_level(from_tenths)}–#{skill_level(to_tenths)}"
 
   def count(value, precision: 1) = number_with_precision(value, precision:, delimiter: ",")
@@ -55,4 +51,14 @@ module SkillStatsHelper
   def attempts_per_point_text(value) = value ? count(value) : "too few covered steps to estimate"
 
   def materials_text(quantities) = quantities.empty? ? "—" : quantities.map { |name, quantity| "#{name}: #{count(quantity)}" }.join(", ")
+
+  # Sits each metal's ore next to its ingots (ore first), groups ordered by largest quantity.
+  def grouped_by_metal(quantities)
+    quantities.group_by { |name, _| material_metal(name) }
+      .transform_values { |rows| rows.sort_by { |name, _| name.end_with?("ingots") ? 1 : 0 } }
+      .sort_by { |_, rows| -rows.map(&:last).max }
+  end
+
+  # Bare "ingots" is iron's own name (see SkillAttempts::Importer.normalize_material_name).
+  def material_metal(name) = name == "ingots" ? "iron" : name.delete_suffix(" ore").delete_suffix(" ingots")
 end
