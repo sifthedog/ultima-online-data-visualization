@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_10_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_11_000000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -47,7 +47,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_10_000000) do
     t.integer "sequence"
     t.string "skill", null: false
     t.decimal "skill_from", precision: 4, scale: 1, null: false
-    t.decimal "skill_to", precision: 4, scale: 1, null: false
+    t.decimal "skill_to", precision: 4, scale: 1
     t.string "subject", null: false
     t.datetime "updated_at", null: false
     t.index ["character_serial", "run_started_at"], name: "index_skill_attempts_on_character_serial_and_run_started_at"

@@ -15,7 +15,7 @@ RSpec.describe SkillAttempt do
 
     expect(attempt).not_to be_valid
     expect(attempt.errors.attribute_names).to include(
-      :external_id, :recorded_at, :skill, :skill_from, :skill_to, :outcome, :subject
+      :external_id, :recorded_at, :skill, :skill_from, :outcome, :subject
     )
   end
 
@@ -25,7 +25,7 @@ RSpec.describe SkillAttempt do
     expect(attempt.reload).to be_mysticism
     expect(attempt).to be_fizzled
     expect(described_class.skills.values).to contain_exactly(
-      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Tinkering", "Mining"
+      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining"
     )
     expect(described_class.outcomes.values).to contain_exactly("made", "failed", "cast", "fizzled", "dug", "smelted")
   end
