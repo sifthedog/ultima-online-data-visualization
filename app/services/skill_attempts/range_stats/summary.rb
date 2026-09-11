@@ -1,11 +1,7 @@
 module SkillAttempts
   class RangeStats
-    # Pure math over per-step tallies for a [from, to) range of skill, in integer tenths.
-    #
-    # A step X is the 0.1 gain that moves a character from X to X + 0.1. Each step holds one
-    # tally per subject, pooled across every run and character, so per_step(X) = attempts / gains
-    # is the expected number of attempts for that gain no matter how many macros passed through X.
-    # Steps with no recorded gain are uncovered: they contribute nothing and are reported as gaps.
+    # A step's tally is pooled across every run/character, so per_step(X) = attempts/gains estimates
+    # attempts for that gain no matter how many macros passed through it. Ungained steps are gaps.
     class Summary
       STEPS_PER_POINT = 10
       MIN_SCALE_COVERAGE = 0.5
@@ -14,7 +10,6 @@ module SkillAttempts
 
       attr_reader :from_tenths, :to_tenths
 
-      # tallies: Hash of step => Array of StepTally, one per subject.
       def initialize(tallies, from_tenths:, to_tenths:)
         @tallies = tallies.select { |step, _| step >= from_tenths && step < to_tenths }
         @all = @tallies.values.flatten
@@ -28,9 +23,8 @@ module SkillAttempts
       def coverage_ratio = total_steps.zero? ? 0.0 : covered_steps.fdiv(total_steps)
       def empty? = @tallies.empty?
 
-      # Steps that recorded at least one attempt, regardless of whether it raised skill. Gathered
-      # yield (e.g. ore from a mining swing) happens on every attempt, not just ones that gain skill,
-      # so it needs its own coverage notion independent of the gain-based `covered` used for consumption.
+      # Gathered yield happens on every swing, not just gain-raising ones, so it needs its own
+      # coverage notion independent of the gain-based `covered` used for consumption.
       def yield_covered_steps = yielded.size
       def yield_coverage_ratio = total_steps.zero? ? 0.0 : yield_covered_steps.fdiv(total_steps)
 

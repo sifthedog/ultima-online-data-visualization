@@ -11,9 +11,8 @@ module SkillAttempts
     Result = Data.define(:imported, :skipped, :problems)
     class Skipped < StandardError; end
 
-    # The client only names a metal in an ore tooltip; ingots (and the rare ore miss) come back as
-    # a bare "Ingots"/"ore", identifiable only by hue. Iron is hue 0 and reads with no metal prefix
-    # in-game (plain "Ingots"), so it's left alone here too.
+    # A bare "Ingots"/"ore" tooltip is identifiable only by hue; iron (hue 0) reads with no
+    # metal prefix in-game, so it's left alone here too.
     INGOT_METAL_HUES = {
       2207 => "verite", 2213 => "golden", 2219 => "valorite",
       2406 => "shadow iron", 2413 => "copper", 2418 => "bronze", 2419 => "dull copper"

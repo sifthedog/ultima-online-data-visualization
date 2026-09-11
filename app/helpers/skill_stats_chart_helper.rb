@@ -1,6 +1,4 @@
 module SkillStatsChartHelper
-  # Decorates SkillAttempts::ChartLayout's geometry with the display strings
-  # (bar labels/titles, tick labels) so the SVG template stays declarative.
   def chart_layout(points)
     layout = SkillAttempts::ChartLayout.call(points)
 

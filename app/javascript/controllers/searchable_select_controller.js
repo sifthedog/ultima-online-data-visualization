@@ -1,8 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Progressively enhances a <select> into a searchable combobox: the select
-// stays in the DOM (hidden) as the real form field, an input filters a
-// server-rendered <li> list, and picking one syncs the select's value.
+// Progressively enhances a <select> into a searchable combobox: it stays hidden as the real
+// form field while an input filters a server-rendered list and syncs picks back to it.
 export default class extends Controller {
   static targets = [ "select", "input", "list", "option" ]
 

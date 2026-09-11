@@ -1,6 +1,5 @@
 module SkillAttempts
-  # Aggregates attempts and consumed materials for one skill over a [from, to) range,
-  # pooled per 0.1 step so overlapping macro runs are not double counted.
+  # Pooled per 0.1 step so overlapping macro runs aren't double counted.
   class RangeStats
     include Utils::Callable
 
@@ -20,9 +19,7 @@ module SkillAttempts
 
     Result = Data.define(:skill, :from_tenths, :to_tenths, :subject, :summary, :by_subject, :tiers)
 
-    # One subject's unbroken run of consecutive skill points: `summary` is recomputed over the
-    # run's own [from_tenths, to_tenths) so its per-point rates reflect that stretch alone, and
-    # `points` holds the same run's individual Summary::Point values for the expanded view.
+    # `summary` recomputes rates over the run's own range rather than averaging `points`.
     Tier = Data.define(:subject, :from_tenths, :to_tenths, :summary, :points)
 
     STEP = Arel.sql("(skill_attempts.skill_from * 10)::integer")
@@ -117,10 +114,8 @@ module SkillAttempts
       )
     end
 
-    # A gain belongs to every step it climbed through: a row that ends where the next attempt
-    # started can span two steps when the shard applied the gain during a pause, and each of those
-    # steps was passed exactly once. Filtered by the step, not the start, so a row that began just
-    # below the range still credits the step inside it. A null end is an attempt with no gain.
+    # A gain credits every step it climbed through, not just its start step, since a shard pause
+    # can land it mid-span. Filtered by step, so a row that began just below the range still counts.
     def gains
       by_skill
         .where("skill_attempts.skill_to > skill_attempts.skill_from")

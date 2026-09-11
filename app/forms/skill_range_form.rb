@@ -1,4 +1,3 @@
-# Query parameters for the skill stats page: which skill, which [from, to) range, optional subject.
 class SkillRangeForm
   include ActiveModel::Model
   include ActiveModel::Attributes

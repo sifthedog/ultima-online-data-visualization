@@ -1,9 +1,6 @@
 module SkillAttempts
-  # Within a run, a row ends where the next attempt started: the recorder writes rows that way now,
-  # and this brings the rest in line - rows recorded before it did, whose end was read a cycle
-  # after the attempt and missed a gain that landed during a pause, and rows whose end the client
-  # never answered. An end is only ever raised to a value the file itself recorded next, so running
-  # it again changes nothing.
+  # Raises a row's end to the next row's start within its run, backfilling rows recorded before
+  # the recorder did this itself. Only ever raises the end, so running it again changes nothing.
   class ChainGains
     include Utils::Callable
 
@@ -23,7 +20,6 @@ module SkillAttempts
         AND (skill_attempts.skill_to IS NULL OR chained.next_from > skill_attempts.skill_to)
     SQL
 
-    # Returns how many rows changed.
     def call
       SkillAttempt.connection.exec_update(SQL, "SkillAttempts::ChainGains")
     end
