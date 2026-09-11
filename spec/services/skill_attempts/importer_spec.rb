@@ -10,18 +10,19 @@ RSpec.describe SkillAttempts::Importer do
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(6)
+    expect { result = import }.to change(SkillAttempt, :count).by(8)
 
-    expect(result.imported).to eq(6)
+    expect(result.imported).to eq(8)
     expect(result.skipped).to eq(0)
-    expect(result.problems.size).to eq(7)
-    expect(result.problems[0]).to eq("#{path}:4: no to")
-    expect(result.problems[1]).to start_with("#{path}:6: not JSON (")
-    expect(result.problems[2]).to eq("#{path}:7: version 2, this reads version 1")
-    expect(result.problems[3]).to eq("#{path}:8: no from")
-    expect(result.problems[4]).to eq("#{path}:9: unknown skill \"Taming\"")
-    expect(result.problems[5]).to eq("#{path}:10: unknown outcome \"throttled\"")
-    expect(result.problems[6]).to eq("#{path}:12: no used")
+    expect(result.problems).to contain_exactly(
+      a_string_starting_with("#{path}:6: not JSON ("),
+      "#{path}:7: version 2, this reads version 1",
+      "#{path}:8: no from",
+      "#{path}:9: unknown skill \"Taming\"",
+      "#{path}:10: unknown outcome \"throttled\"",
+      "#{path}:12: no used",
+      "#{path}:17: not an object"
+    )
   end
 
   it "maps a bowcraft row with its materials" do
@@ -57,10 +58,12 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.consumed_materials.count).to eq(1)
   end
 
-  it "leaves out a row whose skill_to the client never answered" do
+  it "keeps a row whose end the client never answered, with no skill_to" do
     import
 
-    expect(SkillAttempt.find_by(external_id: "0x1505877b/1788689627575/4")).to be_nil
+    attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1788689627575/4")
+
+    expect(attempt).to have_attributes(skill_from: 80.1, skill_to: nil, outcome: "fizzled")
   end
 
   it "changes nothing when the same file is imported twice" do
@@ -70,7 +73,7 @@ RSpec.describe SkillAttempts::Importer do
 
     expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(6)
+    expect(result.skipped).to eq(8)
   end
 
   it "maps a dug mining row with its gathered ore" do
@@ -111,5 +114,14 @@ RSpec.describe SkillAttempts::Importer do
 
   it "refuses a path that does not exist" do
     expect { described_class.call("/nowhere/nothing.jsonl") }.to raise_error(ArgumentError, /no such file/)
+  end
+
+  it "imports every row across multiple batches" do
+    stub_const("SkillAttempts::Importer::BATCH_SIZE", 2)
+
+    result = import
+
+    expect(result.imported).to eq(8)
+    expect(SkillAttempt.count).to eq(8)
   end
 end

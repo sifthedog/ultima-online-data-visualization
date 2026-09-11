@@ -13,3 +13,5 @@
 {"v":1,"id":"0x1505877b/1789056730585/32","t":1789056821.304,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"pickaxe","from":79.0,"to":79.1,"outcome":"dug","gained":[{"name":"iron ore","graphic":"0x19b7","hue":0,"qty":2}]}
 {"v":1,"id":"0x1505877b/1789056730585/36","t":1789056830.816,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"pickaxe","from":79.2,"to":79.2,"outcome":"failed"}
 {"v":1,"id":"0x1505877b/1789056730585/34","t":1789056826.075,"char":"Sif The Dog","serial":"0x1505877b","skill":"Mining","used":"fire beetle","from":79.1,"to":79.1,"outcome":"smelted","consumed":[{"name":"iron ore","graphic":"0x19b7","hue":0,"qty":98}],"gained":[{"name":"98 Ingots","graphic":"0x1bf2","hue":0,"qty":49}]}
+{"v":1,"id":"0x1505877b/1789200005321/1","t":1789200009.417,"char":"Sif The Dog","serial":"0x1505877b","skill":"Inscription","used":"Recall","from":45.0,"to":45.1,"outcome":"made","consumed":[{"name":"blank scroll","graphic":"0x0e34","hue":0,"qty":1},{"name":"black pearl","graphic":"0x0f7a","hue":0,"qty":5}]}
+[1,2,3]
