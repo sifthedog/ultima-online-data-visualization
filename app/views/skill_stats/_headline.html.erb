@@ -1,44 +1,26 @@
 <section class="space-y-3" data-testid="headline">
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-      <div class="flex items-center gap-1 text-sm text-slate-400">Expected attempts<%= hint_for(:expected_attempts) %></div>
-      <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.expected_attempts) %></p>
+    <%= render layout: "metric_tile", locals: { label: "Expected attempts", hint_key: :expected_attempts, value: count(summary.expected_attempts) } do %>
       <p class="text-xs text-slate-500">to travel the covered <%= count(summary.covered_points) %> points</p>
-    </div>
-    <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-      <div class="flex items-center gap-1 text-sm text-slate-400">Attempts per skill point<%= hint_for(:attempts_per_point) %></div>
-      <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.attempts_per_point) %></p>
+    <% end %>
+    <%= render layout: "metric_tile", locals: { label: "Attempts per skill point", hint_key: :attempts_per_point, value: count(summary.attempts_per_point) } do %>
       <div class="flex items-center gap-1 text-xs text-slate-500">success rate <%= percent(summary.success_rate) %><%= hint_for(:success_rate) %></div>
-    </div>
+    <% end %>
     <% if summary.consumption.empty? && summary.gathered.empty? %>
       <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 sm:col-span-2">
         <p class="text-sm text-slate-400">Materials</p>
         <p class="mt-1 text-slate-300">No materials recorded.</p>
       </div>
     <% else %>
-      <% summary.consumption.each do |name, total| %>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-          <div class="flex items-center gap-1 text-sm text-slate-400">Total <%= name %><%= hint_for(:material_total_consumed) %></div>
-          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= whole(total) %></p>
-          <p class="text-xs text-slate-500">for the covered range</p>
-        </div>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-          <div class="flex items-center gap-1 text-sm text-slate-400"><%= name.capitalize %> per skill point<%= hint_for(:material_per_point_consumed) %></div>
-          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.average_consumption[name]) %></p>
-          <p class="text-xs text-slate-500">average over covered points</p>
-        </div>
-      <% end %>
-      <% summary.gathered.each do |name, total| %>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-          <div class="flex items-center gap-1 text-sm text-slate-400">Total <%= name %><%= hint_for(:material_total_gathered) %></div>
-          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= whole(total) %></p>
-          <p class="text-xs text-slate-500">gathered in the covered range</p>
-        </div>
-        <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-          <div class="flex items-center gap-1 text-sm text-slate-400"><%= name.capitalize %> per swing<%= hint_for(:material_per_swing_gathered) %></div>
-          <p class="mt-1 text-3xl font-semibold tabular-nums"><%= count(summary.average_yield[name]) %></p>
-          <p class="text-xs text-slate-500">average over swing-covered steps</p>
-        </div>
+      <% material_sections(summary).each do |section| %>
+        <% section[:totals].each do |name, total| %>
+          <%= render layout: "metric_tile", locals: { label: "Total #{name}", hint_key: section[:total_hint], value: whole(total) } do %>
+            <p class="text-xs text-slate-500"><%= section[:total_caption] %></p>
+          <% end %>
+          <%= render layout: "metric_tile", locals: { label: "#{name.capitalize} #{section[:rate_label_suffix]}", hint_key: section[:rate_hint], value: count(section[:average][name]) } do %>
+            <p class="text-xs text-slate-500"><%= section[:rate_caption] %></p>
+          <% end %>
+        <% end %>
       <% end %>
     <% end %>
   </div>

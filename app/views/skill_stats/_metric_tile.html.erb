@@ -1,0 +1,5 @@
+<div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+  <div class="flex items-center gap-1 text-sm text-slate-400"><%= label %><%= hint_for(hint_key) if hint_key %></div>
+  <p class="mt-1 text-3xl font-semibold tabular-nums"><%= value %></p>
+  <%= yield %>
+</div>
