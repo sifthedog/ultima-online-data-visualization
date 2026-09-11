@@ -24,5 +24,6 @@
     <%= render "headline", summary: summary %>
     <%= render "chart", summary: summary %>
     <%= render "subjects", by_subject: @stats.by_subject if @stats.by_subject.any? %>
+    <%= render "tiers", tiers: @stats.tiers if @stats.by_subject.any? %>
   <% end %>
 <% end %>

@@ -132,7 +132,8 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(points.size).to eq(2)
     expect(points[0]).to have_attributes(point: 60, steps_in_range: 10, covered_steps: 7, expected: 7.0, partial: true)
     expect(points[0].scaled).to be_within(0.001).of(10.0)
-    expect(points[1]).to have_attributes(point: 61, covered_steps: 0, scaled: nil, partial: false)
+    expect(points[0].consumption["regular boards"]).to be_within(0.001).of(70.0)
+    expect(points[1]).to have_attributes(point: 61, covered_steps: 0, scaled: nil, partial: false, consumption: {})
   end
 
   it "refuses to scale up a point covered by fewer than half its steps" do
@@ -239,5 +240,42 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(summary.attempts).to eq(1)
     expect(summary.covered_steps).to eq(0)
     expect(summary.uncovered_attempts).to eq(1)
+  end
+
+  describe "#tiers" do
+    it "is empty when narrowed to a single subject" do
+      attempt(60.0, subject: "bow")
+
+      expect(stats(to_tenths: 601, subject: "bow").tiers).to eq([])
+    end
+
+    it "merges a subject's unbroken run of skill points into one row, recomputed over the whole run" do
+      attempt(60.0, subject: "bow")
+      attempt(61.0, subject: "bow")
+
+      tiers = stats(to_tenths: 620).tiers
+
+      expect(tiers.size).to eq(1)
+      tier = tiers.first
+      expect(tier.subject).to eq("bow")
+      expect(tier.from_tenths).to eq(600)
+      expect(tier.to_tenths).to eq(620)
+      expect(tier.summary.covered_steps).to eq(2)
+      expect(tier.summary.attempts_per_point).to be_within(0.001).of(10.0)
+      expect(tier.summary.average_consumption["regular boards"]).to be_within(0.001).of(70.0)
+      expect(tier.points.map(&:point)).to eq([ 60, 61 ])
+    end
+
+    it "breaks a subject's run at a point it never touched, and keeps subjects' runs independent" do
+      attempt(60.0, subject: "bow")
+      attempt(61.0, subject: "crossbow")
+      attempt(62.0, subject: "bow")
+      # point 63 (630-639) is left with no attempts from anyone
+
+      tiers = stats(to_tenths: 640).tiers
+
+      expect(tiers.map(&:subject)).to eq(%w[bow crossbow bow])
+      expect(tiers.map { |tier| [ tier.from_tenths, tier.to_tenths ] }).to eq([ [ 600, 610 ], [ 610, 620 ], [ 620, 630 ] ])
+    end
   end
 end

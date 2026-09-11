@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe SkillAttempts::ChartLayout do
   def point(index, scaled:)
     SkillAttempts::RangeStats::Summary::Point.new(
-      point: index, steps_in_range: 10, covered_steps: 10, expected: scaled, scaled:, partial: false
+      point: index, steps_in_range: 10, covered_steps: 10, expected: scaled, scaled:, partial: false, consumption: {}
     )
   end
 

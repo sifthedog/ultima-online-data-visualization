@@ -18,7 +18,12 @@ module SkillAttempts
       end
     end
 
-    Result = Data.define(:skill, :from_tenths, :to_tenths, :subject, :summary, :by_subject)
+    Result = Data.define(:skill, :from_tenths, :to_tenths, :subject, :summary, :by_subject, :tiers)
+
+    # One subject's unbroken run of consecutive skill points: `summary` is recomputed over the
+    # run's own [from_tenths, to_tenths) so its per-point rates reflect that stretch alone, and
+    # `points` holds the same run's individual Summary::Point values for the expanded view.
+    Tier = Data.define(:subject, :from_tenths, :to_tenths, :summary, :points)
 
     STEP = Arel.sql("(skill_attempts.skill_from * 10)::integer")
     GAINED_STEP = Arel.sql("gained.step")
@@ -33,17 +38,37 @@ module SkillAttempts
     def call
       by_subject = tallies_by_subject.transform_values { |tallies| summarize(tallies.transform_values { |tally| [ tally ] }) }
       pooled = tallies_by_subject.values.flat_map(&:values).group_by(&:step)
+      subject_summaries = @subject ? {} : by_subject.sort_by { |_, summary| -summary.attempts }.to_h
 
       Result.new(
         skill: @skill, from_tenths: @from_tenths, to_tenths: @to_tenths, subject: @subject,
         summary: summarize(pooled),
-        by_subject: @subject ? {} : by_subject.sort_by { |_, summary| -summary.attempts }.to_h
+        by_subject: subject_summaries,
+        tiers: subject_summaries.empty? ? [] : tiers(subject_summaries)
       )
     end
 
     private
 
-    def summarize(tallies) = Summary.new(tallies, from_tenths: @from_tenths, to_tenths: @to_tenths)
+    def summarize(tallies, from_tenths: @from_tenths, to_tenths: @to_tenths) = Summary.new(tallies, from_tenths:, to_tenths:)
+
+    # Each subject's unbroken runs of consecutive skill points it had a gain in, oldest first.
+    def tiers(subject_summaries)
+      subject_summaries.flat_map do |subject, subject_summary|
+        wrapped_tallies = tallies_by_subject[subject].transform_values { |tally| [ tally ] }
+
+        consecutive_runs(subject_summary.points).map do |run|
+          from_tenths = run.first.point * Summary::STEPS_PER_POINT
+          to_tenths = (run.last.point + 1) * Summary::STEPS_PER_POINT
+
+          Tier.new(subject:, from_tenths:, to_tenths:, points: run, summary: summarize(wrapped_tallies, from_tenths:, to_tenths:))
+        end
+      end.sort_by(&:from_tenths)
+    end
+
+    def consecutive_runs(points)
+      points.select { |point| point.covered_steps.positive? }.slice_when { |a, b| b.point != a.point + 1 }.to_a
+    end
 
     def tallies_by_subject
       @tallies_by_subject ||= begin

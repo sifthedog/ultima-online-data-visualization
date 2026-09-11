@@ -10,7 +10,7 @@ module SkillAttempts
       STEPS_PER_POINT = 10
       MIN_SCALE_COVERAGE = 0.5
 
-      Point = Data.define(:point, :steps_in_range, :covered_steps, :expected, :scaled, :partial)
+      Point = Data.define(:point, :steps_in_range, :covered_steps, :expected, :scaled, :partial, :consumption)
 
       attr_reader :from_tenths, :to_tenths
 
@@ -87,11 +87,18 @@ module SkillAttempts
           steps = (first...last).filter_map { |step| covered[step] }
           expected = steps.sum { |tally| per_step(tally) }
           reliable = steps.size.fdiv(last - first) >= MIN_SCALE_COVERAGE
-          scaled = steps.empty? || !reliable ? nil : expected * (last - first) / steps.size
+          scale = steps.empty? || !reliable ? nil : (last - first).fdiv(steps.size)
+          scaled = scale && expected * scale
+
+          point_consumption = steps.each_with_object(Hash.new(0.0)) do |tally, totals|
+            tally.quantities.each { |name, quantity| totals[name] += quantity.fdiv(tally.gains) }
+          end.sort.to_h
+          point_consumption = point_consumption.transform_values { |total| total * scale } if scale
 
           Point.new(
             point:, steps_in_range: last - first, covered_steps: steps.size,
-            expected:, scaled:, partial: steps.any? && steps.size < last - first
+            expected:, scaled:, partial: steps.any? && steps.size < last - first,
+            consumption: point_consumption
           )
         end
       end

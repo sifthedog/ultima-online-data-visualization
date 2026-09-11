@@ -14,7 +14,8 @@ module SkillStatsHelper
     chart_points: "Each bar sums attempts ÷ gains over a whole skill point's covered steps. Faded bars are scaled up from a partially covered point, so treat them as rougher estimates.",
     subject_column: "What was being made, cast, dug, or smelted for this row's attempts (e.g. bow vs crossbow).",
     attempts_column: "Raw count of recorded skill-attempt rows for this subject within the selected range.",
-    coverage: "Share of steps with at least one recorded skill gain. Only covered steps feed into the expected-attempts estimate."
+    coverage: "Share of steps with at least one recorded skill gain. Only covered steps feed into the expected-attempts estimate.",
+    tier_items: "Each item's unbroken run of skill points with a recorded gain, one row per run. Attempts and materials per point are recomputed over the whole run, not averaged from the individual points; expand a row to see those individual points."
   }.freeze
 
   def hint_for(key, align: :left) = render("skill_stats/hint", text: HINTS.fetch(key), align:)
@@ -49,4 +50,9 @@ module SkillStatsHelper
   def whole(value) = number_with_delimiter(value.round)
 
   def percent(ratio) = ratio.nil? ? "—" : number_to_percentage(ratio * 100, precision: 1)
+
+  # A per-point attempts figure, or why it can't be estimated (mirrors the chart tooltip's wording).
+  def attempts_per_point_text(value) = value ? count(value) : "too few covered steps to estimate"
+
+  def materials_text(quantities) = quantities.empty? ? "—" : quantities.map { |name, quantity| "#{name}: #{count(quantity)}" }.join(", ")
 end
