@@ -1,9 +1,25 @@
 <%= form_with url: root_path, method: :get, class: "rounded-lg border border-slate-800 bg-slate-900/60 p-5" do |f| %>
   <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
-    <div class="lg:col-span-2">
+    <div class="lg:col-span-2 relative" data-controller="searchable-select">
       <%= f.label :skill, class: "block text-sm font-medium text-slate-300" %>
       <%= f.select :skill, form.skill_options, { selected: form.skill, prompt: "Choose a skill" },
-            required: true, class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
+            required: true, data: { searchable_select_target: "select" },
+            class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
+      <input type="text" role="combobox" aria-expanded="false" aria-autocomplete="list" autocomplete="off"
+             placeholder="Search skills&hellip;" hidden
+             data-searchable-select-target="input"
+             data-action="input->searchable-select#filter focus->searchable-select#open keydown->searchable-select#keydown blur->searchable-select#close"
+             class="mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" />
+      <ul role="listbox" hidden data-searchable-select-target="list"
+          class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-slate-700 bg-slate-950 py-1 text-slate-100 shadow-lg">
+        <% form.skill_options.each do |label, key| %>
+          <li role="option" data-value="<%= key %>" data-searchable-select-target="option"
+              data-action="mousedown->searchable-select#pick:prevent"
+              class="cursor-pointer px-3 py-2 hover:bg-slate-800">
+            <%= label %>
+          </li>
+        <% end %>
+      </ul>
     </div>
     <div>
       <%= f.label :from, class: "block text-sm font-medium text-slate-300" %>

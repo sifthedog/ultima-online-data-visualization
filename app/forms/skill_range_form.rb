@@ -20,7 +20,7 @@ class SkillRangeForm
   def from_tenths = tenths(from)
   def to_tenths = tenths(to)
 
-  def skill_options = SkillAttempt.skills.map { |key, label| [ label, key ] }
+  def skill_options = SkillAttempt.skills.map { |key, label| [ label, key ] }.sort_by { |label, _| label }
 
   def skill_label = SkillAttempt.skills[skill]
 
