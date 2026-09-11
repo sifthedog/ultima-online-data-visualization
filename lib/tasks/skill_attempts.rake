@@ -9,5 +9,12 @@ namespace :skill_attempts do
 
     result.problems.each { |problem| puts "skipped #{problem}" }
     puts "#{result.imported} imported, #{result.skipped} already present -> #{SkillAttempt.count} total"
+
+    Rake::Task["skill_attempts:chain_gains"].invoke
+  end
+
+  desc "Set each row's end to the next row's start within its run, where the file recorded them apart"
+  task chain_gains: :environment do
+    puts "#{SkillAttempts::ChainGains.call} row(s) now end where the attempt after them started"
   end
 end

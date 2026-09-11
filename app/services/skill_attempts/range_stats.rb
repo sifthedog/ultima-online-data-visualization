@@ -21,6 +21,7 @@ module SkillAttempts
     Result = Data.define(:skill, :from_tenths, :to_tenths, :subject, :summary, :by_subject)
 
     STEP = Arel.sql("(skill_attempts.skill_from * 10)::integer")
+    GAINED_STEP = Arel.sql("gained.step")
 
     def initialize(skill:, from_tenths:, to_tenths:, subject: nil)
       @skill = skill
@@ -48,8 +49,13 @@ module SkillAttempts
       @tallies_by_subject ||= begin
         tallies = Hash.new { |hash, subject| hash[subject] = {} }
 
-        attempts.each do |subject, step, count, gains, successes|
-          tallies[subject][step] = StepTally.new(step:, attempts: count, gains:, successes:, quantities: {}, gathered_quantities: {})
+        attempts.each do |subject, step, count, successes|
+          tallies[subject][step] = StepTally.new(step:, attempts: count, gains: 0, successes:, quantities: {}, gathered_quantities: {})
+        end
+
+        gains.each do |subject, step, count|
+          tally = tallies[subject][step] ||= StepTally.blank(step)
+          tallies[subject][step] = tally.with(gains: count)
         end
 
         materials.each do |subject, step, name, quantity|
@@ -66,9 +72,14 @@ module SkillAttempts
       end
     end
 
-    def scope
-      relation = SkillAttempt.where(skill: @skill, skill_from: (@from_tenths / 10.0)...(@to_tenths / 10.0))
+    def by_skill
+      relation = SkillAttempt.where(skill: @skill)
       @subject ? relation.where(subject: @subject) : relation
+    end
+
+    # Attempts belong to the step they were made at
+    def scope
+      by_skill.where(skill_from: (@from_tenths / 10.0)...(@to_tenths / 10.0))
     end
 
     def attempts
@@ -77,9 +88,25 @@ module SkillAttempts
       scope.group(:subject, STEP).pluck(
         :subject, STEP,
         Arel.sql("COUNT(*)"),
-        Arel.sql("COUNT(*) FILTER (WHERE skill_attempts.skill_to > skill_attempts.skill_from)"),
         Arel.sql("COUNT(*) FILTER (WHERE skill_attempts.outcome IN (#{successful}))")
       )
+    end
+
+    # A gain belongs to every step it climbed through: a row that ends where the next attempt
+    # started can span two steps when the shard applied the gain during a pause, and each of those
+    # steps was passed exactly once. Filtered by the step, not the start, so a row that began just
+    # below the range still credits the step inside it. A null end is an attempt with no gain.
+    def gains
+      by_skill
+        .where("skill_attempts.skill_to > skill_attempts.skill_from")
+        .joins(Arel.sql(<<~SQL.squish))
+          CROSS JOIN LATERAL generate_series(
+            (skill_attempts.skill_from * 10)::integer, (skill_attempts.skill_to * 10)::integer - 1
+          ) AS gained(step)
+        SQL
+        .where("gained.step >= ? AND gained.step < ?", @from_tenths, @to_tenths)
+        .group(:subject, GAINED_STEP)
+        .pluck(:subject, GAINED_STEP, Arel.sql("COUNT(*)"))
     end
 
     def materials

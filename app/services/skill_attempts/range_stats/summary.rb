@@ -8,6 +8,7 @@ module SkillAttempts
     # Steps with no recorded gain are uncovered: they contribute nothing and are reported as gaps.
     class Summary
       STEPS_PER_POINT = 10
+      MIN_SCALE_COVERAGE = 0.5
 
       Point = Data.define(:point, :steps_in_range, :covered_steps, :expected, :scaled, :partial)
 
@@ -85,7 +86,8 @@ module SkillAttempts
           last = [ (point + 1) * STEPS_PER_POINT, to_tenths ].min
           steps = (first...last).filter_map { |step| covered[step] }
           expected = steps.sum { |tally| per_step(tally) }
-          scaled = steps.empty? ? nil : expected * (last - first) / steps.size
+          reliable = steps.size.fdiv(last - first) >= MIN_SCALE_COVERAGE
+          scaled = steps.empty? || !reliable ? nil : expected * (last - first) / steps.size
 
           Point.new(
             point:, steps_in_range: last - first, covered_steps: steps.size,

@@ -135,6 +135,14 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(points[1]).to have_attributes(point: 61, covered_steps: 0, scaled: nil, partial: false)
   end
 
+  it "refuses to scale up a point covered by fewer than half its steps" do
+    4.times { |index| attempt(60.0 + index / 10.0) }
+
+    points = stats(to_tenths: 610).summary.points
+
+    expect(points[0]).to have_attributes(point: 60, covered_steps: 4, expected: 4.0, scaled: nil, partial: true)
+  end
+
   it "respects range edges that fall inside a skill point" do
     attempt(60.5)
 
@@ -201,5 +209,35 @@ RSpec.describe SkillAttempts::RangeStats do
     # smelted ore only shows up in the pooled summary above thanks to the pickaxe swing's gain.
     expect(result.by_subject["fire beetle"].consumption).to eq({})
     expect(result.by_subject["fire beetle"].gathered).to eq("98 Ingots" => 49.0)
+  end
+
+  it "credits every step a single row climbed through" do
+    create(:skill_attempt, subject: "bow", skill_from: 60.0, skill_to: 60.2, outcome: :made)
+
+    summary = stats(to_tenths: 602).summary
+
+    expect(summary.attempts).to eq(1)
+    expect(summary.covered_steps).to eq(2)
+    expect(summary.uncovered_ranges).to be_empty
+    expect(summary.expected_attempts).to eq(1.0)
+  end
+
+  it "credits a step inside the range to a row that started just below it" do
+    create(:skill_attempt, subject: "bow", skill_from: 59.9, skill_to: 60.1, outcome: :made)
+
+    summary = stats(to_tenths: 601).summary
+
+    expect(summary.attempts).to eq(0)
+    expect(summary.covered_steps).to eq(1)
+  end
+
+  it "counts a row whose end the client never answered as an attempt with no gain" do
+    create(:skill_attempt, subject: "bow", skill_from: 60.0, skill_to: nil, outcome: :failed)
+
+    summary = stats(to_tenths: 601).summary
+
+    expect(summary.attempts).to eq(1)
+    expect(summary.covered_steps).to eq(0)
+    expect(summary.uncovered_attempts).to eq(1)
   end
 end
