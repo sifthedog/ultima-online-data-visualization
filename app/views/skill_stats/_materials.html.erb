@@ -1,0 +1,61 @@
+<% if summary.gathered.any? %>
+  <section class="space-y-2" data-testid="gathered-materials">
+    <h2 class="text-lg font-semibold">Gathered per swing</h2>
+    <p class="text-xs text-slate-500">One row per resource, picked up on any swing at a yield-covered step — not just ones that raised skill.</p>
+    <div class="overflow-x-auto rounded-lg border border-slate-800">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-900/80 text-left text-slate-400">
+          <tr>
+            <th class="px-4 py-2 font-medium">Resource</th>
+            <th class="px-4 py-2 text-right font-medium">
+              <span class="inline-flex items-center justify-end gap-1">Total gathered<%= hint_for(:material_total_gathered, align: :right) %></span>
+            </th>
+            <th class="px-4 py-2 text-right font-medium">
+              <span class="inline-flex items-center justify-end gap-1">Per swing<%= hint_for(:material_per_swing_gathered, align: :right) %></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <% summary.gathered.sort_by { |_, total| -total }.each do |name, total| %>
+            <tr>
+              <td class="px-4 py-2 capitalize"><%= name %></td>
+              <td class="px-4 py-2 text-right tabular-nums"><%= whole(total) %></td>
+              <td class="px-4 py-2 text-right tabular-nums"><%= count(summary.average_yield[name]) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% end %>
+
+<% if summary.consumption.any? %>
+  <section class="space-y-2" data-testid="consumed-materials">
+    <h2 class="text-lg font-semibold">Consumed</h2>
+    <p class="text-xs text-slate-500">Spent converting one resource into another, such as smelting ore into ingots, expected per skill point of the covered range.</p>
+    <div class="overflow-x-auto rounded-lg border border-slate-800">
+      <table class="w-full text-sm">
+        <thead class="bg-slate-900/80 text-left text-slate-400">
+          <tr>
+            <th class="px-4 py-2 font-medium">Resource</th>
+            <th class="px-4 py-2 text-right font-medium">
+              <span class="inline-flex items-center justify-end gap-1">Total consumed<%= hint_for(:material_total_consumed, align: :right) %></span>
+            </th>
+            <th class="px-4 py-2 text-right font-medium">
+              <span class="inline-flex items-center justify-end gap-1">Per skill point<%= hint_for(:material_per_point_consumed, align: :right) %></span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-800">
+          <% summary.consumption.sort_by { |_, total| -total }.each do |name, total| %>
+            <tr>
+              <td class="px-4 py-2 capitalize"><%= name %></td>
+              <td class="px-4 py-2 text-right tabular-nums"><%= whole(total) %></td>
+              <td class="px-4 py-2 text-right tabular-nums"><%= count(summary.average_consumption[name]) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% end %>

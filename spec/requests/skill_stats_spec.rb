@@ -24,21 +24,30 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).to include("<svg")
     expect(response.body).to include('data-testid="subjects"')
     expect(response.body).to include("crossbow")
+    expect(response.body).to include('data-testid="tiers"')
+    expect(response.body).to include("bow")
   end
 
-  it "shows gathered-material tiles for mining alongside any consumption" do
+  it "shows a per-resource materials table for mining instead of the tile grid or tool-grouped tables" do
     dug = create(:skill_attempt, :mining)
-    create(:gathered_material, skill_attempt: dug, quantity: 2)
+    create(:gathered_material, skill_attempt: dug, name: "iron ore", quantity: 2)
+    create(:skill_attempt, :mining, skill_from: 79.1, skill_to: 79.2)
     smelted = create(:skill_attempt, :smelted)
-    create(:consumed_material, skill_attempt: smelted, quantity: 98)
-    create(:gathered_material, skill_attempt: smelted, name: "98 Ingots", quantity: 49)
+    create(:consumed_material, skill_attempt: smelted, name: "iron ore", quantity: 98)
+    create(:gathered_material, skill_attempt: smelted, name: "ingots", quantity: 49)
+    create(:gathered_material, skill_attempt: smelted, name: "dull copper ingots", hue: 2419, quantity: 12)
 
     get root_path(skill: "mining", from: "79", to: "80")
 
     expect(response).to have_http_status(:ok)
-    expect(response.body).to include("Total iron ore")
-    expect(response.body).to include("Iron ore per swing")
-    expect(response.body).to include("Total 98 Ingots")
+    expect(response.body).to include("<svg")
+    expect(response.body).to include('data-testid="gathered-materials"')
+    expect(response.body).to include("iron ore")
+    expect(response.body).to include("dull copper ingots")
+    expect(response.body).to include('data-testid="consumed-materials"')
+    expect(response.body).not_to include("Total iron ore")
+    expect(response.body).not_to include('data-testid="subjects"')
+    expect(response.body).not_to include('data-testid="tiers"')
   end
 
   it "hides the subject table when a subject is chosen" do
@@ -49,6 +58,7 @@ RSpec.describe "Skill stats", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("Expected attempts")
     expect(response.body).not_to include('data-testid="subjects"')
+    expect(response.body).not_to include('data-testid="tiers"')
   end
 
   it "says so when the skill has no data in the range" do

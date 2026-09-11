@@ -6,7 +6,9 @@
     <%= render layout: "metric_tile", locals: { label: "Attempts per skill point", hint_key: :attempts_per_point, value: count(summary.attempts_per_point) } do %>
       <div class="flex items-center gap-1 text-xs text-slate-500">success rate <%= percent(summary.success_rate) %><%= hint_for(:success_rate) %></div>
     <% end %>
-    <% if summary.consumption.empty? && summary.gathered.empty? %>
+    <% if summary.gathered.any? %>
+      <%# Gathering skills get a per-resource table (see _materials) instead of a tile per material. %>
+    <% elsif summary.consumption.empty? %>
       <div class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 sm:col-span-2">
         <p class="text-sm text-slate-400">Materials</p>
         <p class="mt-1 text-slate-300">No materials recorded.</p>

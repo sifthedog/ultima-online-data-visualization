@@ -7,6 +7,40 @@ RSpec.describe SkillAttempts::Importer do
     described_class.call(path)
   end
 
+  describe ".normalize_material_name" do
+    it "strips a leading stack-size count and downcases the rest" do
+      expect(described_class.normalize_material_name("1082 Ingots")).to eq("ingots")
+    end
+
+    it "leaves a name with no leading count alone besides casing" do
+      expect(described_class.normalize_material_name("Iron Ore")).to eq("iron ore")
+    end
+
+    it "leaves plain iron ingots (hue 0) with no metal prefix" do
+      expect(described_class.normalize_material_name("1082 Ingots", hue: 0)).to eq("ingots")
+    end
+
+    it "names a colored ingot by its hue, since the client tooltip never does" do
+      expect(described_class.normalize_material_name("49 Ingots", hue: 2419)).to eq("dull copper ingots")
+    end
+
+    it "names a colored ore that the client tooltip failed to identify" do
+      expect(described_class.normalize_material_name("ore", hue: 2406)).to eq("shadow iron ore")
+    end
+
+    it "leaves an unrecognized hue's generic ingots name alone" do
+      expect(described_class.normalize_material_name("Ingots", hue: 9999)).to eq("ingots")
+    end
+
+    it "treats a bare ore (no metal line in the tooltip) as plain iron ore" do
+      expect(described_class.normalize_material_name("ore", hue: 0)).to eq("iron ore")
+    end
+
+    it "treats a bare ore with an unrecognized hue as iron ore too" do
+      expect(described_class.normalize_material_name("2 Ore", hue: 9999)).to eq("iron ore")
+    end
+  end
+
   it "imports every readable row once and reports the rest" do
     result = nil
 
@@ -109,7 +143,7 @@ RSpec.describe SkillAttempts::Importer do
     )
     expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "iron ore", quantity: 98)
-    expect(attempt.gathered_materials.sole).to have_attributes(name: "98 Ingots", quantity: 49)
+    expect(attempt.gathered_materials.sole).to have_attributes(name: "ingots", quantity: 49)
   end
 
   it "refuses a path that does not exist" do

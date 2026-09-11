@@ -17,4 +17,18 @@ namespace :skill_attempts do
   task chain_gains: :environment do
     puts "#{SkillAttempts::ChainGains.call} row(s) now end where the attempt after them started"
   end
+
+  desc "Re-normalize consumed/gathered material names imported before the naming fixes"
+  task normalize_material_names: :environment do
+    [ ConsumedMaterial, GatheredMaterial ].each do |klass|
+      fixed = klass.find_each.sum do |material|
+        normalized = SkillAttempts::Importer.normalize_material_name(material.name, hue: material.hue)
+        next 0 if normalized == material.name
+
+        material.update_column(:name, normalized)
+        1
+      end
+      puts "#{fixed} #{klass.name.underscore.humanize.downcase}(s) normalized"
+    end
+  end
 end

@@ -23,7 +23,11 @@
   <% unless summary.empty? %>
     <%= render "headline", summary: summary %>
     <%= render "chart", summary: summary %>
-    <%= render "subjects", by_subject: @stats.by_subject if @stats.by_subject.any? %>
-    <%= render "tiers", tiers: @stats.tiers if @stats.by_subject.any? %>
+    <% if summary.gathered.any? %>
+      <%= render "materials", summary: summary %>
+    <% elsif @stats.by_subject.any? %>
+      <%= render "subjects", by_subject: @stats.by_subject %>
+      <%= render "tiers", tiers: @stats.tiers %>
+    <% end %>
   <% end %>
 <% end %>

@@ -11,6 +11,30 @@ module SkillAttempts
     Result = Data.define(:imported, :skipped, :problems)
     class Skipped < StandardError; end
 
+    # The client only names a metal in an ore tooltip; ingots (and the rare ore miss) come back as
+    # a bare "Ingots"/"ore", identifiable only by hue. Iron is hue 0 and reads with no metal prefix
+    # in-game (plain "Ingots"), so it's left alone here too.
+    INGOT_METAL_HUES = {
+      2207 => "verite", 2213 => "golden", 2219 => "valorite",
+      2406 => "shadow iron", 2413 => "copper", 2418 => "bronze", 2419 => "dull copper"
+    }.freeze
+    GENERIC_RESOURCE_NAMES = %w[ore ingots].freeze
+
+    # Stacked items report their client tooltip as their name (e.g. "1082 Ingots"), which bakes
+    # the stack size into the name; ore is unaffected because Legion resolves its name itself.
+    def self.normalize_material_name(name, hue: 0)
+      normalized = name.to_s.sub(/\A\d[\d,]*\s+/, "").downcase
+      return normalized unless GENERIC_RESOURCE_NAMES.include?(normalized)
+
+      metal = INGOT_METAL_HUES[hue.to_i]
+      return "#{metal} #{normalized}" if metal
+      # A bare "ore" is a tooltip read that came back with no metal line, which Legion treats as
+      # plain iron (see its metal.py) rather than a metal of its own, so it isn't its own bucket.
+      return "iron ore" if normalized == "ore"
+
+      normalized
+    end
+
     def initialize(path)
       @path = path
     end
@@ -91,7 +115,7 @@ module SkillAttempts
       Array(row[key]).map do |item|
         {
           skill_attempt_id: attempt_id,
-          name: item["name"].to_s,
+          name: self.class.normalize_material_name(item["name"], hue: item["hue"] || 0),
           graphic: item["graphic"],
           hue: item["hue"] || 0,
           quantity: item["qty"] || 0
