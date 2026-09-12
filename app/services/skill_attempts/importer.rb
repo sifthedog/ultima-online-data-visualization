@@ -2,7 +2,7 @@ module SkillAttempts
   class Importer
     include Utils::Callable
 
-    DEFAULT_PATH = File.expand_path("~/Downloads/TazUO-Launcher.osx-arm64/TazUO/skill-attempts.jsonl")
+    DEFAULT_PATH = File.expand_path("~/Downloads/TazUO-Launcher.osx-arm64/TazUO/LegionScripts/skill-attempts.jsonl")
     VERSION = 1
     # "to" is not required: the recorder writes null there when the client had stopped answering
     REQUIRED = %w[id t skill from outcome used].freeze

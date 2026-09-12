@@ -1,5 +1,5 @@
 namespace :skill_attempts do
-  desc "Import a Legion skill-attempts.jsonl (default: the TazUO copy in ~/Downloads)"
+  desc "Import a Legion skill-attempts.jsonl (default: the LegionScripts copy in ~/Downloads)"
   task :import, [ :path ] => :environment do |_, args|
     path = args[:path].presence || SkillAttempts::Importer::DEFAULT_PATH
 
