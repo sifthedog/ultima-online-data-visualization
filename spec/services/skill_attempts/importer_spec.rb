@@ -44,9 +44,9 @@ RSpec.describe SkillAttempts::Importer do
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(8)
+    expect { result = import }.to change(SkillAttempt, :count).by(9)
 
-    expect(result.imported).to eq(8)
+    expect(result.imported).to eq(9)
     expect(result.skipped).to eq(0)
     expect(result.problems).to contain_exactly(
       a_string_starting_with("#{path}:6: not JSON ("),
@@ -115,7 +115,7 @@ RSpec.describe SkillAttempts::Importer do
 
     expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(8)
+    expect(result.skipped).to eq(9)
   end
 
   it "maps a dug mining row with its gathered ore" do
@@ -154,6 +154,19 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.gathered_materials.sole).to have_attributes(name: "ingots", quantity: 49)
   end
 
+  it "maps an alchemy row with its reagents and bottle" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1532f1f4/1789309691635/7")
+
+    expect(attempt).to have_attributes(
+      skill: "alchemy", outcome: "made", skill_from: 30.1, skill_to: 30.2, subject: "poison"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials.order(:name).map { |m| [ m.name, m.quantity ] })
+      .to eq([ [ "empty bottles", 1 ], [ "nightshade", 2 ] ])
+    expect(attempt.gathered_materials).to be_empty
+  end
+
   it "refuses a path that does not exist" do
     expect { described_class.call("/nowhere/nothing.jsonl") }.to raise_error(ArgumentError, /no such file/)
   end
@@ -163,7 +176,7 @@ RSpec.describe SkillAttempts::Importer do
 
     result = import
 
-    expect(result.imported).to eq(8)
-    expect(SkillAttempt.count).to eq(8)
+    expect(result.imported).to eq(9)
+    expect(SkillAttempt.count).to eq(9)
   end
 end

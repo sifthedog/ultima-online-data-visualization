@@ -16,3 +16,4 @@
 {"v":1,"id":"0x1505877b/1789200005321/1","t":1789200009.417,"char":"Sif The Dog","serial":"0x1505877b","skill":"Inscription","gainPath":"Legacy","used":"Recall","from":45.0,"to":45.1,"outcome":"made","consumed":[{"name":"blank scroll","graphic":"0x0e34","hue":0,"qty":1},{"name":"black pearl","graphic":"0x0f7a","hue":0,"qty":5}]}
 [1,2,3]
 {"v":1,"id":"0x1/1/6","t":1.0,"skill":"Magery","gainPath":"Sideways","used":"Bless","from":1.0,"to":1.0,"outcome":"cast","ok":true}
+{"v":1,"id":"0x1532f1f4/1789309691635/7","t":1789309716.964,"char":"Sifoleta","serial":"0x1532f1f4","skill":"Alchemy","gainPath":"Modern","used":"poison","from":30.1,"to":30.2,"outcome":"made","consumed":[{"name":"empty bottles","graphic":"0xf0e","hue":0,"qty":1},{"name":"nightshade","graphic":"0xf88","hue":0,"qty":2}]}

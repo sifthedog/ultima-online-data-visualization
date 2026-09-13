@@ -10,7 +10,8 @@ class SkillAttempt < ApplicationRecord
     tailoring: "Tailoring",
     inscription: "Inscription",
     tinkering: "Tinkering",
-    mining: "Mining"
+    mining: "Mining",
+    alchemy: "Alchemy"
   }, validate: true
 
   enum :outcome, {

@@ -25,7 +25,7 @@ RSpec.describe SkillAttempt do
     expect(attempt.reload).to be_mysticism
     expect(attempt).to be_fizzled
     expect(described_class.skills.values).to contain_exactly(
-      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining"
+      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining", "Alchemy"
     )
     expect(described_class.outcomes.values).to contain_exactly("made", "failed", "cast", "fizzled", "dug", "smelted")
     expect(described_class.gain_paths.values).to contain_exactly("Legacy", "Modern", "Perilous")
