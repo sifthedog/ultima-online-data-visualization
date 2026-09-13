@@ -20,12 +20,12 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).to include("1 of 10")
     expect(response.body).to include("31.0–31.1")
     expect(response.body).to include("31.2–32.0")
-    expect(response.body).to include("Total regular boards")
+    expect(response.body).to include("Total Regular Boards")
     expect(response.body).to include("<svg")
     expect(response.body).to include('data-testid="subjects"')
-    expect(response.body).to include("crossbow")
+    expect(response.body).to include("Crossbow")
     expect(response.body).to include('data-testid="tiers"')
-    expect(response.body).to include("bow")
+    expect(response.body).to include("Bow")
   end
 
   it "shows a per-resource materials table for mining instead of the tile grid or tool-grouped tables" do
@@ -42,10 +42,10 @@ RSpec.describe "Skill stats", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("<svg")
     expect(response.body).to include('data-testid="gathered-materials"')
-    expect(response.body).to include("iron ore")
-    expect(response.body).to include("dull copper ingots")
+    expect(response.body).to include("Iron Ore")
+    expect(response.body).to include("Dull Copper Ingots")
     expect(response.body).to include('data-testid="consumed-materials"')
-    expect(response.body).not_to include("Total iron ore")
+    expect(response.body).not_to include("Total Iron Ore")
     expect(response.body).not_to include('data-testid="subjects"')
     expect(response.body).not_to include('data-testid="tiers"')
   end

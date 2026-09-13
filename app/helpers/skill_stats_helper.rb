@@ -50,7 +50,7 @@ module SkillStatsHelper
   # A per-point attempts figure, or why it can't be estimated (mirrors the chart tooltip's wording).
   def attempts_per_point_text(value) = value ? count(value) : "too few covered steps to estimate"
 
-  def materials_text(quantities) = quantities.empty? ? "—" : quantities.map { |name, quantity| "#{name}: #{count(quantity)}" }.join(", ")
+  def materials_text(quantities) = quantities.empty? ? "—" : quantities.map { |name, quantity| "#{name.titleize}: #{count(quantity)}" }.join(", ")
 
   # Sits each metal's ore next to its ingots (ore first), groups ordered by largest quantity.
   def grouped_by_metal(quantities)

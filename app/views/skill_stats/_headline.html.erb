@@ -16,10 +16,10 @@
     <% else %>
       <% material_sections(summary).each do |section| %>
         <% section[:totals].each do |name, total| %>
-          <%= render layout: "metric_tile", locals: { label: "Total #{name}", hint_key: section[:total_hint], value: whole(total) } do %>
+          <%= render layout: "metric_tile", locals: { label: "Total #{name.titleize}", hint_key: section[:total_hint], value: whole(total) } do %>
             <p class="text-xs text-slate-500"><%= section[:total_caption] %></p>
           <% end %>
-          <%= render layout: "metric_tile", locals: { label: "#{name.capitalize} #{section[:rate_label_suffix]}", hint_key: section[:rate_hint], value: count(section[:average][name]) } do %>
+          <%= render layout: "metric_tile", locals: { label: "#{name.titleize} #{section[:rate_label_suffix]}", hint_key: section[:rate_hint], value: count(section[:average][name]) } do %>
             <p class="text-xs text-slate-500"><%= section[:rate_caption] %></p>
           <% end %>
         <% end %>

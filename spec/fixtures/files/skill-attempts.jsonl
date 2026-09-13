@@ -17,3 +17,4 @@
 [1,2,3]
 {"v":1,"id":"0x1/1/6","t":1.0,"skill":"Magery","gainPath":"Sideways","used":"Bless","from":1.0,"to":1.0,"outcome":"cast","ok":true}
 {"v":1,"id":"0x1532f1f4/1789309691635/7","t":1789309716.964,"char":"Sifoleta","serial":"0x1532f1f4","skill":"Alchemy","gainPath":"Modern","used":"poison","from":30.1,"to":30.2,"outcome":"made","consumed":[{"name":"empty bottles","graphic":"0xf0e","hue":0,"qty":1},{"name":"nightshade","graphic":"0xf88","hue":0,"qty":2}]}
+{"v":1,"id":"0x154368cf/1789258728827/1","t":1789258732.093,"char":"Work Work","serial":"0x154368cf","skill":"Carpentry","gainPath":"Modern","used":"barrel staves","from":0.0,"to":0.4,"outcome":"made","consumed":[{"name":"regular boards","graphic":"0x1bd7","hue":0,"qty":5}]}

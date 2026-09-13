@@ -18,7 +18,7 @@
         <% grouped_by_metal(quantities).each_with_index do |(_, rows), group_index| %>
           <% rows.each do |name, total| %>
             <tr class="<%= "bg-slate-900/40" if group_index.odd? %>">
-              <td class="px-4 py-2 capitalize"><%= name %></td>
+              <td class="px-4 py-2"><%= name.titleize %></td>
               <td class="px-4 py-2 text-right tabular-nums"><%= whole(total) %></td>
               <td class="px-4 py-2 text-right tabular-nums"><%= count(rate[name]) %></td>
             </tr>

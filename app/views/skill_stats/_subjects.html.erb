@@ -25,7 +25,7 @@
       <tbody class="divide-y divide-slate-800">
         <% by_subject.each do |subject, summary| %>
           <tr>
-            <td class="px-4 py-2"><%= subject %></td>
+            <td class="px-4 py-2"><%= subject.titleize %></td>
             <td class="px-4 py-2 text-right tabular-nums"><%= whole(summary.attempts) %></td>
             <td class="px-4 py-2 text-right tabular-nums"><%= percent(summary.success_rate) %></td>
             <td class="px-4 py-2 text-right tabular-nums"><%= count(summary.expected_attempts) %></td>

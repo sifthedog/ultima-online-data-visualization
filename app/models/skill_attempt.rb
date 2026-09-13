@@ -11,7 +11,8 @@ class SkillAttempt < ApplicationRecord
     inscription: "Inscription",
     tinkering: "Tinkering",
     mining: "Mining",
-    alchemy: "Alchemy"
+    alchemy: "Alchemy",
+    carpentry: "Carpentry"
   }, validate: true
 
   enum :outcome, {

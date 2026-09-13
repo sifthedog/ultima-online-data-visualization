@@ -118,10 +118,14 @@ module SkillAttempts
     end
 
     def material_attributes(row, attempt_id, key)
-      Array(row[key]).map do |item|
+      Array(row[key]).filter_map do |item|
+        name = self.class.normalize_material_name(item["name"], hue: item["hue"] || 0)
+        # A potion's bottle is its container, not a reagent, so alchemy never counts it as spent.
+        next if row["skill"] == "Alchemy" && name == "empty bottles"
+
         {
           skill_attempt_id: attempt_id,
-          name: self.class.normalize_material_name(item["name"], hue: item["hue"] || 0),
+          name:,
           graphic: item["graphic"],
           hue: item["hue"] || 0,
           quantity: item["qty"] || 0
