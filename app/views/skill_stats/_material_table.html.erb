@@ -15,7 +15,7 @@
         </tr>
       </thead>
       <tbody class="divide-y divide-slate-800">
-        <% grouped_by_metal(quantities).each_with_index do |(_, rows), group_index| %>
+        <% grouped_by_resource(quantities).each_with_index do |(_, rows), group_index| %>
           <% rows.each do |name, total| %>
             <tr class="<%= "bg-slate-900/40" if group_index.odd? %>">
               <td class="px-4 py-2"><%= name.titleize %></td>

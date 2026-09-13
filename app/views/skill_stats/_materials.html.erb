@@ -7,7 +7,7 @@
 
 <% if summary.consumption.any? %>
   <%= render "material_table", testid: "consumed-materials", title: "Consumed",
-        note: "Spent converting one resource into another, such as smelting ore into ingots, expected per skill point of the covered range.",
+        note: "Spent converting one resource into another, such as smelting ore into ingots or cutting logs into boards, expected per skill point of the covered range.",
         verb: "consumed", total_hint: :material_total_consumed, rate_hint: :material_per_point_consumed, rate_label: "Per skill point",
         quantities: summary.consumption, rate: summary.average_consumption %>
 <% end %>

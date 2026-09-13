@@ -52,13 +52,14 @@ module SkillStatsHelper
 
   def materials_text(quantities) = quantities.empty? ? "—" : quantities.map { |name, quantity| "#{name.titleize}: #{count(quantity)}" }.join(", ")
 
-  # Sits each metal's ore next to its ingots (ore first), groups ordered by largest quantity.
-  def grouped_by_metal(quantities)
-    quantities.group_by { |name, _| material_metal(name) }
-      .transform_values { |rows| rows.sort_by { |name, _| name.end_with?("ingots") ? 1 : 0 } }
+  # Sits each metal's ore next to its ingots and each wood's logs next to its boards (raw first),
+  # groups ordered by largest quantity.
+  def grouped_by_resource(quantities)
+    quantities.group_by { |name, _| material_group(name) }
+      .transform_values { |rows| rows.sort_by { |name, _| name.end_with?("ingots", "boards") ? 1 : 0 } }
       .sort_by { |_, rows| -rows.map(&:last).max }
   end
 
-  # Bare "ingots" is iron's own name (see SkillAttempts::Importer.normalize_material_name).
-  def material_metal(name) = name == "ingots" ? "iron" : name.delete_suffix(" ore").delete_suffix(" ingots")
+  # Bare "ingots" is iron's own name; bare "logs"/"boards" are plain wood and group together as "".
+  def material_group(name) = name == "ingots" ? "iron" : name.sub(/ ?(ore|ingots|logs|boards)\z/, "")
 end

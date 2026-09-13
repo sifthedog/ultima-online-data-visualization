@@ -39,14 +39,26 @@ RSpec.describe SkillAttempts::Importer do
     it "treats a bare ore with an unrecognized hue as iron ore too" do
       expect(described_class.normalize_material_name("2 Ore", hue: 9999)).to eq("iron ore")
     end
+
+    it "pluralizes the recorder's chopped \"Log\" stack" do
+      expect(described_class.normalize_material_name("Log")).to eq("logs")
+    end
+
+    it "names a board stack the tooltip never resolved by its graphic and hue" do
+      expect(described_class.normalize_material_name("0x1bd7", hue: 2010)).to eq("oak boards")
+    end
+
+    it "names colored logs by their hue" do
+      expect(described_class.normalize_material_name("20 logs", hue: 1191)).to eq("ash logs")
+    end
   end
 
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(10)
+    expect { result = import }.to change(SkillAttempt, :count).by(13)
 
-    expect(result.imported).to eq(10)
+    expect(result.imported).to eq(13)
     expect(result.skipped).to eq(0)
     expect(result.problems).to contain_exactly(
       a_string_starting_with("#{path}:6: not JSON ("),
@@ -115,7 +127,7 @@ RSpec.describe SkillAttempts::Importer do
 
     expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(10)
+    expect(result.skipped).to eq(13)
   end
 
   it "maps a dug mining row with its gathered ore" do
@@ -154,6 +166,38 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.gathered_materials.sole).to have_attributes(name: "ingots", quantity: 49)
   end
 
+  it "maps a chopped lumberjacking row with its gathered logs" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/31")
+
+    expect(attempt).to have_attributes(
+      skill: "lumberjacking", outcome: "chopped", skill_from: 8.5, skill_to: 8.6, subject: "axe"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials.sole).to have_attributes(name: "logs", graphic: "0x1bdd", hue: 0, quantity: 20)
+  end
+
+  it "leaves a failed lumberjacking swing with no materials at all" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/32")
+
+    expect(attempt).to have_attributes(outcome: "failed", skill_from: 8.6, skill_to: 8.6)
+    expect(attempt).not_to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials).to be_empty
+  end
+
+  it "maps a converting row with both consumed logs and gathered boards, named by hue" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/45")
+
+    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials.sole).to have_attributes(name: "oak logs", quantity: 50)
+    expect(attempt.gathered_materials.sole).to have_attributes(name: "oak boards", hue: 2010, quantity: 50)
+  end
+
   it "maps an alchemy row with its reagents, leaving the bottle out" do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x1532f1f4/1789309691635/7")
@@ -187,7 +231,7 @@ RSpec.describe SkillAttempts::Importer do
 
     result = import
 
-    expect(result.imported).to eq(10)
-    expect(SkillAttempt.count).to eq(10)
+    expect(result.imported).to eq(13)
+    expect(SkillAttempt.count).to eq(13)
   end
 end

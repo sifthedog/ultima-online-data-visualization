@@ -8,6 +8,8 @@ RSpec.describe SkillAttempt do
     expect(build(:skill_attempt, :fizzled)).to be_valid
     expect(build(:skill_attempt, :mining)).to be_valid
     expect(build(:skill_attempt, :smelted)).to be_valid
+    expect(build(:skill_attempt, :lumberjacking)).to be_valid
+    expect(build(:skill_attempt, :converted)).to be_valid
   end
 
   it "requires the columns the importer always fills" do
@@ -25,9 +27,9 @@ RSpec.describe SkillAttempt do
     expect(attempt.reload).to be_mysticism
     expect(attempt).to be_fizzled
     expect(described_class.skills.values).to contain_exactly(
-      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining", "Alchemy", "Carpentry"
+      "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining", "Alchemy", "Carpentry", "Lumberjacking"
     )
-    expect(described_class.outcomes.values).to contain_exactly("made", "failed", "cast", "fizzled", "dug", "smelted")
+    expect(described_class.outcomes.values).to contain_exactly("made", "failed", "cast", "fizzled", "dug", "smelted", "chopped", "converted")
     expect(described_class.gain_paths.values).to contain_exactly("Legacy", "Modern", "Perilous")
   end
 
@@ -68,18 +70,22 @@ RSpec.describe SkillAttempt do
     let!(:fizzled) { create(:skill_attempt, :fizzled) }
     let!(:dug) { create(:skill_attempt, :mining) }
     let!(:smelted) { create(:skill_attempt, :smelted) }
+    let!(:chopped) { create(:skill_attempt, :lumberjacking) }
+    let!(:converted) { create(:skill_attempt, :converted) }
 
-    it "is what the shard called made, cast, dug, or smelted" do
+    it "is what the shard called made, cast, dug, smelted, chopped, or converted" do
       expect(made).to be_success
       expect(cast).to be_success
       expect(dug).to be_success
       expect(smelted).to be_success
+      expect(chopped).to be_success
+      expect(converted).to be_success
       expect(failed).not_to be_success
       expect(fizzled).not_to be_success
     end
 
     it ".successful and .unsuccessful split the table the same way" do
-      expect(described_class.successful).to contain_exactly(made, cast, dug, smelted)
+      expect(described_class.successful).to contain_exactly(made, cast, dug, smelted, chopped, converted)
       expect(described_class.unsuccessful).to contain_exactly(failed, fizzled)
     end
 

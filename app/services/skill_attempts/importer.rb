@@ -11,22 +11,26 @@ module SkillAttempts
     Result = Data.define(:imported, :skipped, :problems)
     class Skipped < StandardError; end
 
-    # A bare "Ingots"/"ore" tooltip is identifiable only by hue; iron (hue 0) reads with no
-    # metal prefix in-game, so it's left alone here too.
-    INGOT_METAL_HUES = {
+    # A bare "Ingots"/"ore"/"logs"/"boards" tooltip is identifiable only by hue; iron and plain
+    # wood (hue 0) read with no prefix in-game, so they're left alone here too.
+    RESOURCE_HUES = {
       2207 => "verite", 2213 => "golden", 2219 => "valorite",
-      2406 => "shadow iron", 2413 => "copper", 2418 => "bronze", 2419 => "dull copper"
+      2406 => "shadow iron", 2413 => "copper", 2418 => "bronze", 2419 => "dull copper",
+      1191 => "ash", 2010 => "oak"
     }.freeze
-    GENERIC_RESOURCE_NAMES = %w[ore ingots].freeze
+    GENERIC_RESOURCE_NAMES = %w[ore ingots logs boards].freeze
+    # Legion names a chopped stack "Log", and a board stack whose tooltip never arrived by its graphic.
+    RAW_NAMES = { "log" => "logs", "0x1bd7" => "boards" }.freeze
 
     # Stacked items report their client tooltip as their name (e.g. "1082 Ingots"), which bakes
     # the stack size into the name; ore is unaffected because Legion resolves its name itself.
     def self.normalize_material_name(name, hue: 0)
       normalized = name.to_s.sub(/\A\d[\d,]*\s+/, "").downcase
+      normalized = RAW_NAMES.fetch(normalized, normalized)
       return normalized unless GENERIC_RESOURCE_NAMES.include?(normalized)
 
-      metal = INGOT_METAL_HUES[hue.to_i]
-      return "#{metal} #{normalized}" if metal
+      kind = RESOURCE_HUES[hue.to_i]
+      return "#{kind} #{normalized}" if kind
       # A bare "ore" is a tooltip read that came back with no metal line, which Legion treats as
       # plain iron (see its metal.py) rather than a metal of its own, so it isn't its own bucket.
       return "iron ore" if normalized == "ore"

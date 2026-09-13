@@ -44,5 +44,20 @@ FactoryBot.define do
       outcome { :smelted }
       subject { "fire beetle" }
     end
+
+    trait :lumberjacking do
+      skill { :lumberjacking }
+      skill_from { 10.5 }
+      skill_to { 10.6 }
+      outcome { :chopped }
+      subject { "axe" }
+    end
+
+    trait :converted do
+      lumberjacking
+      skill_from { 10.7 }
+      skill_to { 10.7 }
+      outcome { :converted }
+    end
   end
 end
