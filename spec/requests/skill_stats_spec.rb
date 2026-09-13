@@ -50,15 +50,18 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).not_to include('data-testid="tiers"')
   end
 
-  it "hides the subject table when a subject is chosen" do
-    create(:skill_attempt, subject: "bow")
+  it "narrows to the chosen gain path" do
+    create(:skill_attempt, subject: "bow", gain_path: :legacy)
 
-    get root_path(skill: "bowcraft_fletching", from: "31", to: "32", subject: "bow")
+    get root_path(skill: "bowcraft_fletching", from: "31", to: "32", gain_path: "modern")
 
     expect(response).to have_http_status(:ok)
+    expect(response.body).to include("No attempts recorded")
+
+    get root_path(skill: "bowcraft_fletching", from: "31", to: "32", gain_path: "legacy")
+
     expect(response.body).to include("Expected attempts")
-    expect(response.body).not_to include('data-testid="subjects"')
-    expect(response.body).not_to include('data-testid="tiers"')
+    expect(response.body).to include("· Legacy")
   end
 
   it "says so when the skill has no data in the range" do
@@ -67,6 +70,22 @@ RSpec.describe "Skill stats", type: :request do
     expect(response).to have_http_status(:ok)
     expect(response.body).to include("No attempts recorded for this skill in this range.")
     expect(response.body).not_to include("<svg")
+  end
+
+  it "lists a skill's training hints in order, and nothing when it has none" do
+    create(:training_hint, skill: :magery, body: "Cast Magic Arrow")
+    create(:training_hint, skill: :magery, body: "Then Fireball")
+    create(:training_hint, skill: :mining)
+
+    get root_path(skill: "magery")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include('data-testid="training-hints"')
+    expect(response.body.index("Cast Magic Arrow")).to be < response.body.index("Then Fireball")
+
+    get root_path(skill: "tinkering")
+
+    expect(response.body).not_to include('data-testid="training-hints"')
   end
 
   it "shows validation errors instead of stats" do

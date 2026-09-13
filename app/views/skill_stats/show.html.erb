@@ -18,6 +18,7 @@
     </ul>
   </section>
 <% else %>
+  <%= render "training_hints", hints: @hints if @hints.any? %>
   <% summary = @stats.summary %>
   <%= render "coverage", summary: summary, form: @form %>
   <% unless summary.empty? %>

@@ -1,0 +1,8 @@
+<section class="space-y-2" data-testid="training-hints">
+  <h2 class="text-lg font-semibold">Training hints</h2>
+  <ul class="list-disc space-y-1 rounded-lg border border-slate-800 bg-slate-900/60 p-4 pl-9 text-slate-300">
+    <% hints.each do |hint| %>
+      <li><%= hint.body %></li>
+    <% end %>
+  </ul>
+</section>

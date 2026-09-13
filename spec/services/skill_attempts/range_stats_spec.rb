@@ -1,10 +1,10 @@
 require "rails_helper"
 
 RSpec.describe SkillAttempts::RangeStats do
-  def attempt(from, gained: true, subject: "bow", serial: "0xabc", boards: 7, ore: nil, outcome: nil, skill: :bowcraft_fletching)
+  def attempt(from, gained: true, subject: "bow", serial: "0xabc", boards: 7, ore: nil, outcome: nil, skill: :bowcraft_fletching, gain_path: :modern)
     attempt = create(
       :skill_attempt,
-      skill:, subject:, character_serial: serial,
+      skill:, subject:, gain_path:, character_serial: serial,
       skill_from: from, skill_to: gained ? from + 0.1 : from,
       outcome: outcome || (gained ? :made : :failed)
     )
@@ -13,8 +13,8 @@ RSpec.describe SkillAttempts::RangeStats do
     attempt
   end
 
-  def stats(from_tenths: 600, to_tenths: 610, skill: :bowcraft_fletching, subject: nil)
-    described_class.call(skill:, from_tenths:, to_tenths:, subject:)
+  def stats(from_tenths: 600, to_tenths: 610, skill: :bowcraft_fletching, gain_path: nil)
+    described_class.call(skill:, from_tenths:, to_tenths:, gain_path:)
   end
 
   it "pools two characters passing through the same step instead of adding their attempts" do
@@ -65,16 +65,16 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(summary.average_consumption["regular boards"]).to be_within(0.001).of(105.0)
   end
 
-  it "narrows to one subject and skips the breakdown when a subject is given" do
-    attempt(60.0, subject: "bow")
-    attempt(60.0, gained: false, subject: "crossbow")
-    attempt(60.0, subject: "crossbow")
+  it "narrows to one gain path when one is given, keeping the subject breakdown" do
+    attempt(60.0, subject: "bow", gain_path: :modern)
+    attempt(60.0, gained: false, subject: "crossbow", gain_path: :legacy)
+    attempt(60.0, subject: "crossbow", gain_path: :legacy)
 
-    result = stats(to_tenths: 601, subject: "crossbow")
+    result = stats(to_tenths: 601, gain_path: "legacy")
 
     expect(result.summary.attempts).to eq(2)
     expect(result.summary.expected_attempts).to eq(2.0)
-    expect(result.by_subject).to be_empty
+    expect(result.by_subject.keys).to eq(%w[crossbow])
   end
 
   it "pools every subject for the headline and summarizes each one separately" do
@@ -243,10 +243,11 @@ RSpec.describe SkillAttempts::RangeStats do
   end
 
   describe "#tiers" do
-    it "is empty when narrowed to a single subject" do
-      attempt(60.0, subject: "bow")
+    it "follows the gain path filter" do
+      attempt(60.0, subject: "bow", gain_path: :legacy)
 
-      expect(stats(to_tenths: 601, subject: "bow").tiers).to eq([])
+      expect(stats(to_tenths: 601, gain_path: "modern").tiers).to eq([])
+      expect(stats(to_tenths: 601, gain_path: "legacy").tiers.map(&:subject)).to eq(%w[bow])
     end
 
     it "merges a subject's unbroken run of skill points into one row, recomputed over the whole run" do

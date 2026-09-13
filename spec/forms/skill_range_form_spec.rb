@@ -47,14 +47,9 @@ RSpec.describe SkillRangeForm do
     expect(form.to_tenths).to eq(999)
   end
 
-  it "offers only the chosen skill's subjects and drops a stale one" do
-    create(:skill_attempt, :mysticism, subject: "Stone Form")
-    create(:skill_attempt, subject: "bow")
-
-    form = described_class.new(skill: "mysticism", subject: "bow")
-
-    expect(form.subject_options).to eq([ "Stone Form" ])
-    expect(form.chosen_subject).to be_nil
-    expect(form.to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, subject: nil)
+  it "offers every gain path under the shard's name and ignores one it has not been taught" do
+    expect(described_class.new(gain_path: "legacy").gain_path_options).to eq([ [ "Legacy", "legacy" ], [ "Modern", "modern" ], [ "Perilous", "perilous" ] ])
+    expect(described_class.new(skill: "mysticism", gain_path: "legacy").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: "legacy")
+    expect(described_class.new(skill: "mysticism", gain_path: "sideways").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: nil)
   end
 end

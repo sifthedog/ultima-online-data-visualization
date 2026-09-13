@@ -32,14 +32,13 @@
             class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
     </div>
     <div>
-      <%= f.label :subject, class: "block text-sm font-medium text-slate-300" %>
-      <%= f.select :subject, form.subject_options, { selected: form.chosen_subject, include_blank: "All" },
-            disabled: form.subject_options.empty?,
-            class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100 disabled:opacity-40" %>
+      <%= f.label :gain_path, "Path", class: "block text-sm font-medium text-slate-300" %>
+      <%= f.select :gain_path, form.gain_path_options, { selected: form.chosen_gain_path, include_blank: "All" },
+            class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
     </div>
   </div>
   <div class="mt-4 flex items-center justify-between gap-4">
-    <p class="text-xs text-slate-500">From is inclusive, to is exclusive: 60 to 70 covers the gains from 60.0 up to 70.0. Pick a skill to see subjects.</p>
+    <p class="text-xs text-slate-500">From is inclusive, to is exclusive: 60 to 70 covers the gains from 60.0 up to 70.0.</p>
     <%= f.submit "Show", class: "rounded-md bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500" %>
   </div>
 <% end %>

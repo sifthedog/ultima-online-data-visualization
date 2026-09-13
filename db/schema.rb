@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_09_11_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_09_13_000001) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -41,6 +41,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_000000) do
     t.string "character_serial"
     t.datetime "created_at", null: false
     t.string "external_id", null: false
+    t.string "gain_path", default: "Modern", null: false
     t.string "outcome", null: false
     t.datetime "recorded_at", null: false
     t.datetime "run_started_at"
@@ -55,6 +56,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_09_11_000000) do
     t.index ["recorded_at"], name: "index_skill_attempts_on_recorded_at"
     t.index ["skill", "skill_from"], name: "index_skill_attempts_on_skill_and_skill_from"
     t.index ["skill", "subject"], name: "index_skill_attempts_on_skill_and_subject"
+  end
+
+  create_table "training_hints", force: :cascade do |t|
+    t.text "body", null: false
+    t.datetime "created_at", null: false
+    t.string "skill", null: false
+    t.datetime "updated_at", null: false
+    t.index ["skill"], name: "index_training_hints_on_skill"
   end
 
   add_foreign_key "consumed_materials", "skill_attempts"

@@ -59,6 +59,8 @@ module SkillAttempts
     def parse(text)
       row = JSON.parse(text)
       raise Skipped, "not an object" unless row.is_a?(Hash)
+
+      row = row.transform_keys(&:underscore)
       raise Skipped, "version #{row['v'].inspect}, this reads version #{VERSION}" unless row["v"] == VERSION
 
       missing = REQUIRED.select { |name| row[name].nil? }
@@ -67,6 +69,10 @@ module SkillAttempts
       row["skill"] = SkillAttempt.normalize_skill(row["skill"])
       raise Skipped, "unknown skill #{row['skill'].inspect}" unless SkillAttempt.skills.value?(row["skill"])
       raise Skipped, "unknown outcome #{row['outcome'].inspect}" unless SkillAttempt.outcomes.value?(row["outcome"])
+
+      # The recorder writes null where the client never answered [SkillGainMode; Modern is the shard default.
+      row["gain_path"] ||= "Modern"
+      raise Skipped, "unknown gain path #{row['gain_path'].inspect}" unless SkillAttempt.gain_paths.value?(row["gain_path"])
 
       row
     rescue JSON::ParserError => error
@@ -106,6 +112,7 @@ module SkillAttempts
         skill_from: row["from"],
         skill_to: row["to"],
         outcome: row["outcome"],
+        gain_path: row["gain_path"],
         subject: row["used"]
       }
     end

@@ -22,6 +22,8 @@ class SkillAttempt < ApplicationRecord
     smelted: "smelted"
   }, validate: true
 
+  enum :gain_path, { legacy: "Legacy", modern: "Modern", perilous: "Perilous" }, validate: true
+
   SUCCESSFUL_OUTCOMES = %w[made cast dug smelted].freeze
   SKILL_ALIASES = { "Bowcraft" => "Bowcraft/Fletching", "Fletching" => "Bowcraft/Fletching" }.freeze
 

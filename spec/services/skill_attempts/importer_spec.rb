@@ -55,7 +55,8 @@ RSpec.describe SkillAttempts::Importer do
       "#{path}:9: unknown skill \"Taming\"",
       "#{path}:10: unknown outcome \"throttled\"",
       "#{path}:12: no used",
-      "#{path}:17: not an object"
+      "#{path}:17: not an object",
+      "#{path}:18: unknown gain path \"Sideways\""
     )
   end
 
@@ -98,6 +99,13 @@ RSpec.describe SkillAttempts::Importer do
     attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1788689627575/4")
 
     expect(attempt).to have_attributes(skill_from: 80.1, skill_to: nil, outcome: "fizzled")
+  end
+
+  it "reads the gain path off the camelCase key, and assumes Modern where the recorder wrote none" do
+    import
+
+    expect(SkillAttempt.find_by!(external_id: "0x1505877b/1789200005321/1")).to be_legacy
+    expect(SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/32")).to be_modern
   end
 
   it "changes nothing when the same file is imported twice" do

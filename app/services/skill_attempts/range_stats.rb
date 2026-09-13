@@ -17,7 +17,7 @@ module SkillAttempts
       end
     end
 
-    Result = Data.define(:skill, :from_tenths, :to_tenths, :subject, :summary, :by_subject, :tiers)
+    Result = Data.define(:skill, :from_tenths, :to_tenths, :gain_path, :summary, :by_subject, :tiers)
 
     # `summary` recomputes rates over the run's own range rather than averaging `points`.
     Tier = Data.define(:subject, :from_tenths, :to_tenths, :summary, :points)
@@ -25,20 +25,20 @@ module SkillAttempts
     STEP = Arel.sql("(skill_attempts.skill_from * 10)::integer")
     GAINED_STEP = Arel.sql("gained.step")
 
-    def initialize(skill:, from_tenths:, to_tenths:, subject: nil)
+    def initialize(skill:, from_tenths:, to_tenths:, gain_path: nil)
       @skill = skill
       @from_tenths = from_tenths
       @to_tenths = to_tenths
-      @subject = subject.presence
+      @gain_path = gain_path.presence
     end
 
     def call
       by_subject = tallies_by_subject.transform_values { |tallies| summarize(tallies.transform_values { |tally| [ tally ] }) }
       pooled = tallies_by_subject.values.flat_map(&:values).group_by(&:step)
-      subject_summaries = @subject ? {} : by_subject.sort_by { |_, summary| -summary.attempts }.to_h
+      subject_summaries = by_subject.sort_by { |_, summary| -summary.attempts }.to_h
 
       Result.new(
-        skill: @skill, from_tenths: @from_tenths, to_tenths: @to_tenths, subject: @subject,
+        skill: @skill, from_tenths: @from_tenths, to_tenths: @to_tenths, gain_path: @gain_path,
         summary: summarize(pooled),
         by_subject: subject_summaries,
         tiers: subject_summaries.empty? ? [] : tiers(subject_summaries)
@@ -96,7 +96,7 @@ module SkillAttempts
 
     def by_skill
       relation = SkillAttempt.where(skill: @skill)
-      @subject ? relation.where(subject: @subject) : relation
+      @gain_path ? relation.where(gain_path: @gain_path) : relation
     end
 
     # Attempts belong to the step they were made at

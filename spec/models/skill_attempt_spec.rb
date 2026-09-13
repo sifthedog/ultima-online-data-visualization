@@ -28,13 +28,14 @@ RSpec.describe SkillAttempt do
       "Blacksmithy", "Bowcraft/Fletching", "Mysticism", "Magery", "Tailoring", "Inscription", "Tinkering", "Mining"
     )
     expect(described_class.outcomes.values).to contain_exactly("made", "failed", "cast", "fizzled", "dug", "smelted")
+    expect(described_class.gain_paths.values).to contain_exactly("Legacy", "Modern", "Perilous")
   end
 
   it "rejects a skill or outcome it has not been taught" do
-    attempt = build(:skill_attempt, skill: "Taming", outcome: "tamed")
+    attempt = build(:skill_attempt, skill: "Taming", outcome: "tamed", gain_path: "Sideways")
 
     expect(attempt).not_to be_valid
-    expect(attempt.errors.attribute_names).to include(:skill, :outcome)
+    expect(attempt.errors.attribute_names).to include(:skill, :outcome, :gain_path)
   end
 
   it "rejects a repeated external_id" do
