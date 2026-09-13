@@ -39,10 +39,16 @@ module SkillAttempts
       def attempts_per_point = covered_steps.zero? ? nil : expected_attempts / covered_points
 
       # Expected materials, by name, to travel the covered part of the range once.
-      def consumption
-        @consumption ||= covered.values.each_with_object(Hash.new(0.0)) do |tally, totals|
-          tally.quantities.each { |name, quantity| totals[name] += quantity.fdiv(tally.gains) }
-        end.sort.to_h
+      def consumption = @consumption ||= per_gain_totals(:quantities)
+
+      # Expected materials, by name, gathered travelling the covered part of the range once.
+      def harvest = @harvest ||= per_gain_totals(:gathered_quantities)
+
+      # Expected materials, by name, gathered per 1.0 skill point of covered range.
+      def average_harvest
+        return {} if covered_steps.zero?
+
+        harvest.transform_values { |total| total / covered_points }
       end
 
       # Expected materials, by name, per 1.0 skill point of covered range.
@@ -116,6 +122,12 @@ module SkillAttempts
       end
 
       def per_step(tally) = tally.attempts.fdiv(tally.gains)
+
+      def per_gain_totals(field)
+        covered.values.each_with_object(Hash.new(0.0)) do |tally, totals|
+          tally.public_send(field).each { |name, quantity| totals[name] += quantity.fdiv(tally.gains) }
+        end.sort.to_h
+      end
     end
   end
 end

@@ -5,9 +5,9 @@
         quantities: summary.gathered, rate: summary.average_yield %>
 <% end %>
 
-<% if summary.consumption.any? %>
-  <%= render "material_table", testid: "consumed-materials", title: "Consumed",
-        note: "Spent converting one resource into another, such as smelting ore into ingots or cutting logs into boards, expected per skill point of the covered range.",
-        verb: "consumed", total_hint: :material_total_consumed, rate_hint: :material_per_point_consumed, rate_label: "Per skill point",
-        quantities: summary.consumption, rate: summary.average_consumption %>
+<% if summary.harvest.any? %>
+  <%= render "material_table", testid: "gathered-per-point", title: "Gathered",
+        note: "One row per resource, expected to be gathered per skill point of the covered range.",
+        verb: "gathered", total_hint: :material_total_harvested, rate_hint: :material_per_point_harvested, rate_label: "Per skill point",
+        quantities: summary.harvest, rate: summary.average_harvest %>
 <% end %>

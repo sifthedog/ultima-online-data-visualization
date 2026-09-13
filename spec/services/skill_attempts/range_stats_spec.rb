@@ -191,6 +191,18 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(summary.yield_covered_steps).to eq(1)
     expect(summary.gathered).to eq("iron ore" => 2.0)
     expect(summary.average_yield["iron ore"]).to eq(2.0)
+    expect(summary.harvest).to eq({})
+    expect(summary.average_harvest).to eq({})
+  end
+
+  it "prices gathered materials per gain over covered steps, like consumption" do
+    attempt(79.0, gained: true, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2)
+    3.times { attempt(79.0, gained: false, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2) }
+
+    summary = stats(skill: :mining, from_tenths: 790, to_tenths: 800).summary
+
+    expect(summary.harvest).to eq("iron ore" => 8.0)
+    expect(summary.average_harvest["iron ore"]).to be_within(0.001).of(80.0)
   end
 
   it "pools smelting consumption and mining gathering under the same skill without mixing subjects in the by-subject breakdown" do
@@ -202,6 +214,7 @@ RSpec.describe SkillAttempts::RangeStats do
     result = stats(skill: :mining, from_tenths: 790, to_tenths: 791)
 
     expect(result.summary.consumption).to eq("iron ore" => 98.0)
+    expect(result.summary.harvest).to eq("iron ore" => 2.0, "98 Ingots" => 49.0)
     expect(result.summary.gathered).to eq("iron ore" => 1.0, "98 Ingots" => 24.5)
 
     expect(result.by_subject["pickaxe"].consumption).to eq({})

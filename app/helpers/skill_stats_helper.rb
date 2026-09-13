@@ -11,6 +11,8 @@ module SkillStatsHelper
     material_per_point_consumed: "Expected quantity divided by covered skill points — the average amount used per 1.0 point of progress.",
     material_total_gathered: "Expected quantity picked up making one swing at every step that recorded a swing, not just ones that raised skill.",
     material_per_swing_gathered: "Expected quantity divided by swing-covered steps — the average amount gathered per single swing.",
+    material_total_harvested: "Expected quantity gathered travelling the covered range once, based on how much was gathered per skill gain at each covered step.",
+    material_per_point_harvested: "Expected quantity divided by covered skill points — the average amount gathered per 1.0 point of progress.",
     chart_points: "Each bar sums attempts ÷ gains over a whole skill point's covered steps. Faded bars are scaled up from a partially covered point, so treat them as rougher estimates.",
     subject_column: "What was being made, cast, dug, or smelted for this row's attempts (e.g. bow vs crossbow).",
     attempts_column: "Raw count of recorded skill-attempt rows for this subject within the selected range.",
