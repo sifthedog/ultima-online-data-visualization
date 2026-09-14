@@ -21,6 +21,7 @@ module SkillAttempts
     GENERIC_RESOURCE_NAMES = %w[ore ingots logs boards].freeze
     # Legion names a chopped stack "Log", and a board stack whose tooltip never arrived by its graphic.
     RAW_NAMES = { "log" => "logs", "0x1bd7" => "boards" }.freeze
+    BOARD_GRAPHIC = "0x1bd7"
 
     # Stacked items report their client tooltip as their name (e.g. "1082 Ingots"), which bakes
     # the stack size into the name; ore is unaffected because Legion resolves its name itself.
@@ -74,6 +75,8 @@ module SkillAttempts
       raise Skipped, "unknown skill #{row['skill'].inspect}" unless SkillAttempt.skills.value?(row["skill"])
       raise Skipped, "unknown outcome #{row['outcome'].inspect}" unless SkillAttempt.outcomes.value?(row["outcome"])
 
+      repair_misread_conversion(row)
+
       # The recorder writes null where the client never answered [SkillGainMode; Modern is the shard default.
       row["gain_path"] ||= "Modern"
       raise Skipped, "unknown gain path #{row['gain_path'].inspect}" unless SkillAttempt.gain_paths.value?(row["gain_path"])
@@ -81,6 +84,15 @@ module SkillAttempts
       row
     rescue JSON::ParserError => error
       raise Skipped, "not JSON (#{error.message})"
+    end
+
+    # Cutting logs into boards destroys no wood, so a failed row that spent logs is one whose boards
+    # reached the pack after the recorder had already read the change and called the attempt a loss.
+    def repair_misread_conversion(row)
+      return unless row["skill"] == "Lumberjacking" && row["outcome"] == "failed" && row["consumed"].present?
+
+      row["outcome"] = "converted"
+      row["gained"] = row["consumed"].map { |item| item.merge("name" => BOARD_GRAPHIC, "graphic" => BOARD_GRAPHIC) }
     end
 
     def insert(rows)

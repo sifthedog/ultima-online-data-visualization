@@ -56,9 +56,9 @@ RSpec.describe SkillAttempts::Importer do
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(13)
+    expect { result = import }.to change(SkillAttempt, :count).by(14)
 
-    expect(result.imported).to eq(13)
+    expect(result.imported).to eq(14)
     expect(result.skipped).to eq(0)
     expect(result.problems).to contain_exactly(
       a_string_starting_with("#{path}:6: not JSON ("),
@@ -127,7 +127,7 @@ RSpec.describe SkillAttempts::Importer do
 
     expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(13)
+    expect(result.skipped).to eq(14)
   end
 
   it "maps a dug mining row with its gathered ore" do
@@ -198,6 +198,23 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.gathered_materials.sole).to have_attributes(name: "oak boards", hue: 2010, quantity: 50)
   end
 
+  it "reads a failed lumberjacking row that spent logs as the conversion whose boards it missed" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789255957465/220")
+
+    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
+    expect(attempt.consumed_materials.sole).to have_attributes(name: "logs", quantity: 80)
+    expect(attempt.gathered_materials.sole).to have_attributes(
+      name: "boards", graphic: "0x1bd7", hue: 0, quantity: 80
+    )
+  end
+
+  it "leaves a mining row the recorder called failed alone, since a failed smelt really does burn ore" do
+    import
+
+    expect(SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/36")).to be_failed
+  end
+
   it "maps an alchemy row with its reagents, leaving the bottle out" do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x1532f1f4/1789309691635/7")
@@ -231,7 +248,7 @@ RSpec.describe SkillAttempts::Importer do
 
     result = import
 
-    expect(result.imported).to eq(13)
-    expect(SkillAttempt.count).to eq(13)
+    expect(result.imported).to eq(14)
+    expect(SkillAttempt.count).to eq(14)
   end
 end
