@@ -21,7 +21,6 @@ module SkillAttempts
     GENERIC_RESOURCE_NAMES = %w[ore ingots logs boards].freeze
     # Legion names a chopped stack "Log", and a board stack whose tooltip never arrived by its graphic.
     RAW_NAMES = { "log" => "logs", "0x1bd7" => "boards" }.freeze
-    BOARD_GRAPHIC = "0x1bd7"
 
     # Stacked items report their client tooltip as their name (e.g. "1082 Ingots"), which bakes
     # the stack size into the name; ore is unaffected because Legion resolves its name itself.
@@ -92,7 +91,6 @@ module SkillAttempts
       return unless row["skill"] == "Lumberjacking" && row["outcome"] == "failed" && row["consumed"].present?
 
       row["outcome"] = "converted"
-      row["gained"] = row["consumed"].map { |item| item.merge("name" => BOARD_GRAPHIC, "graphic" => BOARD_GRAPHIC) }
     end
 
     def insert(rows)
@@ -138,6 +136,9 @@ module SkillAttempts
         name = self.class.normalize_material_name(item["name"], hue: item["hue"] || 0)
         # A potion's bottle is its container, not a reagent, so alchemy never counts it as spent.
         next if row["skill"] == "Alchemy" && name == "empty bottles"
+        # Boards are chopped logs in another shape, cut by a conversion that never raises the skill,
+        # so counting them would report the same wood a second time.
+        next if row["skill"] == "Lumberjacking" && name.end_with?("boards")
 
         {
           skill_attempt_id: attempt_id,

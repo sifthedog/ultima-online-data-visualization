@@ -188,14 +188,14 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.gathered_materials).to be_empty
   end
 
-  it "maps a converting row with both consumed logs and gathered boards, named by hue" do
+  it "maps a converting row with its consumed logs, leaving the boards it cut out" do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/45")
 
     expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
     expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "oak logs", quantity: 50)
-    expect(attempt.gathered_materials.sole).to have_attributes(name: "oak boards", hue: 2010, quantity: 50)
+    expect(attempt.gathered_materials).to be_empty
   end
 
   it "reads a failed lumberjacking row that spent logs as the conversion whose boards it missed" do
@@ -203,10 +203,8 @@ RSpec.describe SkillAttempts::Importer do
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789255957465/220")
 
     expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
+    expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "logs", quantity: 80)
-    expect(attempt.gathered_materials.sole).to have_attributes(
-      name: "boards", graphic: "0x1bd7", hue: 0, quantity: 80
-    )
   end
 
   it "leaves a mining row the recorder called failed alone, since a failed smelt really does burn ore" do

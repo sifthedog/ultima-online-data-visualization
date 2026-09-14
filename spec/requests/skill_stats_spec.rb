@@ -56,15 +56,16 @@ RSpec.describe "Skill stats", type: :request do
     create(:skill_attempt, :lumberjacking, skill_from: 10.7, skill_to: 10.8)
     converted = create(:skill_attempt, :converted)
     create(:consumed_material, skill_attempt: converted, name: "oak logs", hue: 2010, quantity: 50)
-    create(:gathered_material, skill_attempt: converted, name: "oak boards", graphic: "0x1bd7", hue: 2010, quantity: 50)
+    create(:gathered_material, skill_attempt: chopped, name: "oak logs", hue: 2010, quantity: 4)
 
     get root_path(skill: "lumberjacking", from: "10", to: "11")
 
     expect(response).to have_http_status(:ok)
     expect(response.body).to include('data-testid="gathered-materials"')
     expect(response.body).to include("Logs")
-    expect(response.body).to include("Oak Boards")
+    expect(response.body).to include("Oak Logs")
     expect(response.body).to include('data-testid="gathered-per-point"')
+    expect(response.body).not_to include("Boards")
     expect(response.body).not_to include('data-testid="consumed-materials"')
     expect(response.body).not_to include("Total Logs")
     expect(response.body).not_to include('data-testid="subjects"')
