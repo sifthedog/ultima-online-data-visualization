@@ -1,30 +1,36 @@
+<%# A skill made of one subject repeats it on every row, and one that spends nothing has an empty
+    materials column; either is dropped rather than shown. The template is inline because Tailwind
+    only sees arbitrary values it can read literally in the source. %>
+<% show_item = tiers.map(&:subject).uniq.size > 1 %>
+<% show_materials = tiers.any? { |tier| tier.summary.average_consumption.any? } %>
+<% columns = [ "8rem", ("1fr" if show_item), "7rem", ("1fr" if show_materials) ].compact.join(" ") %>
 <section class="space-y-2" data-testid="tiers">
   <h2 class="flex items-center gap-1 text-lg font-semibold">By skill point<%= hint_for(:tier_items) %></h2>
   <p class="text-xs text-slate-500">Each item's unbroken run of skill points; expand a row to see the 1.0-point figures behind it.</p>
   <div class="divide-y divide-slate-800 overflow-hidden rounded-lg border border-slate-800 text-sm">
-    <div class="grid grid-cols-[8rem_1fr_7rem_1fr] gap-x-6 bg-slate-900/80 px-4 py-2 text-left font-medium text-slate-400">
+    <div class="grid gap-x-6 bg-slate-900/80 px-4 py-2 text-left font-medium text-slate-400" style="grid-template-columns: <%= columns %>">
       <span>Skill point</span>
-      <span>Item</span>
+      <% if show_item %><span>Item</span><% end %>
       <span class="text-right">Attempts/point</span>
-      <span class="text-right">Materials/point</span>
+      <% if show_materials %><span class="text-right">Materials/point</span><% end %>
     </div>
     <% tiers.each do |tier| %>
       <details class="group" data-testid="tier">
-        <summary class="grid grid-cols-[8rem_1fr_7rem_1fr] items-baseline gap-x-6 px-4 py-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-slate-900/40">
+        <summary class="grid items-baseline gap-x-6 px-4 py-2 cursor-pointer list-none [&::-webkit-details-marker]:hidden hover:bg-slate-900/40" style="grid-template-columns: <%= columns %>">
           <span class="tabular-nums">
             <span aria-hidden="true" class="mr-1 inline-block text-slate-500 transition-transform group-open:rotate-90">›</span><%= skill_span(tier.from_tenths, tier.to_tenths) %>
           </span>
-          <span><%= tier.subject.titleize %></span>
+          <% if show_item %><span><%= tier.subject.titleize %></span><% end %>
           <span class="text-right tabular-nums"><%= attempts_per_point_text(tier.summary.attempts_per_point) %></span>
-          <span class="text-right text-slate-300"><%= materials_text(tier.summary.average_consumption) %></span>
+          <% if show_materials %><span class="text-right text-slate-300"><%= materials_text(tier.summary.average_consumption) %></span><% end %>
         </summary>
         <div class="divide-y divide-slate-800/60 bg-slate-950/40">
           <% tier.points.each do |point| %>
-            <div class="grid grid-cols-[8rem_1fr_7rem_1fr] items-baseline gap-x-6 px-4 py-2 text-slate-400">
+            <div class="grid items-baseline gap-x-6 px-4 py-2 text-slate-400" style="grid-template-columns: <%= columns %>">
               <span class="pl-4 tabular-nums"><%= skill_span(point.point * 10, (point.point + 1) * 10) %></span>
-              <span></span>
+              <% if show_item %><span></span><% end %>
               <span class="text-right tabular-nums"><%= attempts_per_point_text(point.scaled) %></span>
-              <span class="text-right"><%= materials_text(point.consumption) %></span>
+              <% if show_materials %><span class="text-right"><%= materials_text(point.consumption) %></span><% end %>
             </div>
           <% end %>
         </div>

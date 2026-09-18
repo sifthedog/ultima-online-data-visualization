@@ -27,7 +27,7 @@
     <% if summary.gathered.any? %>
       <%= render "materials", summary: summary %>
     <% elsif @stats.by_subject.any? %>
-      <%= render "subjects", by_subject: @stats.by_subject %>
+      <%= render "subjects", by_subject: @stats.by_subject if @stats.by_subject.size > 1 %>
       <%= render "tiers", tiers: @stats.tiers %>
     <% end %>
   <% end %>
