@@ -59,5 +59,21 @@ FactoryBot.define do
       skill_to { 10.7 }
       outcome { :converted }
     end
+
+    trait :hiding do
+      skill { :hiding }
+      skill_from { 42.4 }
+      skill_to { 42.5 }
+      outcome { :hidden }
+      subject { "Hiding" }
+    end
+
+    trait :spellweaving do
+      skill { :spellweaving }
+      skill_from { 45.0 }
+      skill_to { 45.1 }
+      outcome { :cast }
+      subject { "Arcane Circle" }
+    end
   end
 end

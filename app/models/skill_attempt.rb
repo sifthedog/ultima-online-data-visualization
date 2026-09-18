@@ -13,7 +13,9 @@ class SkillAttempt < ApplicationRecord
     mining: "Mining",
     alchemy: "Alchemy",
     carpentry: "Carpentry",
-    lumberjacking: "Lumberjacking"
+    lumberjacking: "Lumberjacking",
+    hiding: "Hiding",
+    spellweaving: "Spellweaving"
   }, validate: true
 
   enum :outcome, {
@@ -24,12 +26,13 @@ class SkillAttempt < ApplicationRecord
     dug: "dug",
     smelted: "smelted",
     chopped: "chopped",
-    converted: "converted"
+    converted: "converted",
+    hidden: "hidden"
   }, validate: true
 
   enum :gain_path, { legacy: "Legacy", modern: "Modern", perilous: "Perilous" }, validate: true
 
-  SUCCESSFUL_OUTCOMES = %w[made cast dug smelted chopped converted].freeze
+  SUCCESSFUL_OUTCOMES = %w[made cast dug smelted chopped converted hidden].freeze
   SKILL_ALIASES = { "Bowcraft" => "Bowcraft/Fletching", "Fletching" => "Bowcraft/Fletching" }.freeze
 
   def self.normalize_skill(name) = SKILL_ALIASES.fetch(name, name)

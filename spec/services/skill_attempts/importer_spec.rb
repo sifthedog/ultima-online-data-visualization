@@ -56,9 +56,9 @@ RSpec.describe SkillAttempts::Importer do
   it "imports every readable row once and reports the rest" do
     result = nil
 
-    expect { result = import }.to change(SkillAttempt, :count).by(14)
+    expect { result = import }.to change(SkillAttempt, :count).by(18)
 
-    expect(result.imported).to eq(14)
+    expect(result.imported).to eq(18)
     expect(result.skipped).to eq(0)
     expect(result.problems).to contain_exactly(
       a_string_starting_with("#{path}:6: not JSON ("),
@@ -127,7 +127,7 @@ RSpec.describe SkillAttempts::Importer do
 
     expect { result = import }.not_to change { [ SkillAttempt.count, ConsumedMaterial.count, GatheredMaterial.count ] }
     expect(result.imported).to eq(0)
-    expect(result.skipped).to eq(14)
+    expect(result.skipped).to eq(18)
   end
 
   it "maps a dug mining row with its gathered ore" do
@@ -237,6 +237,32 @@ RSpec.describe SkillAttempts::Importer do
     expect(attempt.gathered_materials).to be_empty
   end
 
+  it "maps a hiding row, which spends and gathers nothing" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1532f1f4/1789338827452/1")
+
+    expect(attempt).to have_attributes(
+      skill: "hiding", outcome: "hidden", skill_from: 42.4, skill_to: 42.5, subject: "Hiding"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials).to be_empty
+    expect(SkillAttempt.find_by!(external_id: "0x1532f1f4/1789338827452/2")).not_to be_success
+  end
+
+  it "maps a spellweaving row, whose subject is the spell" do
+    import
+    attempt = SkillAttempt.find_by!(external_id: "0x1532f1f4/1789400000000/1")
+
+    expect(attempt).to have_attributes(
+      skill: "spellweaving", outcome: "cast", skill_from: 45.0, skill_to: 45.1, subject: "Arcane Circle"
+    )
+    expect(attempt).to be_success
+    expect(attempt.consumed_materials).to be_empty
+    expect(attempt.gathered_materials).to be_empty
+    expect(SkillAttempt.find_by!(external_id: "0x1532f1f4/1789400000000/2")).not_to be_success
+  end
+
   it "refuses a path that does not exist" do
     expect { described_class.call("/nowhere/nothing.jsonl") }.to raise_error(ArgumentError, /no such file/)
   end
@@ -246,7 +272,7 @@ RSpec.describe SkillAttempts::Importer do
 
     result = import
 
-    expect(result.imported).to eq(14)
-    expect(SkillAttempt.count).to eq(14)
+    expect(result.imported).to eq(18)
+    expect(SkillAttempt.count).to eq(18)
   end
 end

@@ -72,6 +72,21 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).not_to include('data-testid="tiers"')
   end
 
+  it "shows a hiding run without the one-subject table or the empty material columns" do
+    create(:skill_attempt, :hiding)
+    create(:skill_attempt, :hiding, skill_from: 42.5, skill_to: 42.5, outcome: :failed)
+
+    get root_path(skill: "hiding", from: "42", to: "43")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("<svg")
+    expect(response.body).to include("No materials recorded.")
+    expect(response.body).to include(%(data-testid="tiers"))
+    expect(response.body).not_to include(%(data-testid="subjects"))
+    expect(response.body).not_to include("Materials/point")
+    expect(response.body).not_to include("<span>Item</span>")
+  end
+
   it "narrows to the chosen gain path" do
     create(:skill_attempt, subject: "bow", gain_path: :legacy)
 
@@ -84,6 +99,20 @@ RSpec.describe "Skill stats", type: :request do
 
     expect(response.body).to include("Expected attempts")
     expect(response.body).to include("· Legacy")
+  end
+
+  it "shows spellweaving by spell, with no materials to report" do
+    create(:skill_attempt, :spellweaving)
+    create(:skill_attempt, :spellweaving, skill_from: 45.1, skill_to: 45.2, subject: "Wildfire")
+
+    get root_path(skill: "spellweaving", from: "45", to: "46")
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("Spellweaving")
+    expect(response.body).to include("Arcane Circle")
+    expect(response.body).to include("Wildfire")
+    expect(response.body).to include("No materials recorded.")
+    expect(response.body).not_to include('data-testid="gathered-materials"')
   end
 
   it "says so when the skill has no data in the range" do
