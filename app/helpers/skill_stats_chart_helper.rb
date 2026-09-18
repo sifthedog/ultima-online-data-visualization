@@ -3,7 +3,7 @@ module SkillStatsChartHelper
     layout = SkillAttempts::ChartLayout.call(points)
 
     layout.merge(
-      bars: layout[:bars].map { |bar| bar.merge(label: bar_label(bar[:point]), title: chart_title(bar[:point])) },
+      bars: layout[:bars].map { |bar| bar.merge(label: bar_label(bar[:point]), title: chart_title(bar[:point]), **span_bounds(bar[:point])) },
       ticks: layout[:ticks].map { |tick| tick.merge(label: whole(tick[:value])) }
     )
   end
@@ -13,6 +13,8 @@ module SkillStatsChartHelper
   def bar_label(point)
     skill_level(point.point * 10) if (point.point % 10).zero?
   end
+
+  def span_bounds(point) = { from: skill_level(point.point * 10), to: skill_level((point.point + 1) * 10) }
 
   def chart_title(point)
     span = skill_span(point.point * 10, (point.point + 1) * 10)

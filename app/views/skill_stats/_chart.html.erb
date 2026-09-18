@@ -1,24 +1,32 @@
 <% layout = chart_layout(summary.points) %>
-<section class="space-y-2" data-testid="chart">
+<section class="space-y-2" data-testid="chart" data-controller="chart" data-action="keydown.esc@window->chart#clear">
   <h2 class="flex items-center gap-1 text-lg font-semibold">Expected attempts per skill point<%= hint_for(:chart_points) %></h2>
-  <p class="text-xs text-slate-500">Hover a bar for details. Faded bars are scaled up from partially covered points; empty slots have no data.</p>
-  <svg viewBox="0 0 <%= layout[:width] %> <%= layout[:height] %>" class="w-full h-auto" role="img" aria-label="Expected attempts per skill point">
-    <% layout[:ticks].each do |tick| %>
-      <line x1="<%= layout[:plot][:x] %>" x2="<%= layout[:plot][:x] + layout[:plot][:w] %>" y1="<%= tick[:y] %>" y2="<%= tick[:y] %>" stroke="#1e293b" stroke-width="1" />
-      <text x="<%= layout[:plot][:x] - 8 %>" y="<%= tick[:y] + 4 %>" text-anchor="end" font-size="11" fill="#64748b"><%= tick[:label] %></text>
-    <% end %>
-    <% layout[:bars].each do |bar| %>
-      <g>
-        <title><%= bar[:title] %></title>
-        <rect x="<%= bar[:slot_x] %>" y="<%= layout[:plot][:y] %>" width="<%= bar[:slot_w] %>" height="<%= layout[:plot][:h] %>" fill="transparent" />
-        <% if bar[:h].positive? %>
-          <rect x="<%= bar[:x] %>" y="<%= bar[:y] %>" width="<%= bar[:w] %>" height="<%= bar[:h] %>" fill="#38bdf8" fill-opacity="<%= bar[:point].partial ? 0.45 : 1 %>" />
-        <% end %>
-        <% if bar[:label] %>
-          <text x="<%= bar[:slot_x] + bar[:slot_w] / 2 %>" y="<%= layout[:baseline] + 18 %>" text-anchor="middle" font-size="11" fill="#94a3b8"><%= bar[:label] %></text>
-        <% end %>
-      </g>
-    <% end %>
-    <line x1="<%= layout[:plot][:x] %>" x2="<%= layout[:plot][:x] + layout[:plot][:w] %>" y1="<%= layout[:baseline] %>" y2="<%= layout[:baseline] %>" stroke="#334155" stroke-width="1" />
-  </svg>
+  <p class="text-xs text-slate-500">Hover a bar for details, or drag across bars for a range summary. Faded bars are scaled up from partially covered points; empty slots have no data.</p>
+  <div class="relative">
+    <svg viewBox="0 0 <%= layout[:width] %> <%= layout[:height] %>" class="w-full h-auto" role="img" aria-label="Expected attempts per skill point"
+         data-action="pointerdown->chart#start pointermove->chart#track pointerup->chart#finish pointerleave->chart#hide">
+      <rect data-chart-target="selection" y="<%= layout[:plot][:y] %>" height="<%= layout[:plot][:h] %>" x="0" width="0" fill="#38bdf8" fill-opacity="0.12" />
+      <% layout[:ticks].each do |tick| %>
+        <line x1="<%= layout[:plot][:x] %>" x2="<%= layout[:plot][:x] + layout[:plot][:w] %>" y1="<%= tick[:y] %>" y2="<%= tick[:y] %>" stroke="#1e293b" stroke-width="1" />
+        <text x="<%= layout[:plot][:x] - 8 %>" y="<%= tick[:y] + 4 %>" text-anchor="end" font-size="11" fill="#64748b"><%= tick[:label] %></text>
+      <% end %>
+      <% layout[:bars].each_with_index do |bar, index| %>
+        <g class="group" data-chart-target="band" data-index="<%= index %>" data-summary="<%= bar[:title] %>"
+           data-attempts="<%= bar[:point].scaled %>" data-from="<%= bar[:from] %>" data-to="<%= bar[:to] %>"
+           data-slot-x="<%= bar[:slot_x] %>" data-slot-w="<%= bar[:slot_w] %>">
+          <title><%= bar[:title] %></title>
+          <rect class="fill-transparent group-hover:fill-slate-400/10" x="<%= bar[:slot_x] %>" y="<%= layout[:plot][:y] %>" width="<%= bar[:slot_w] %>" height="<%= layout[:plot][:h] %>" />
+          <% if bar[:h].positive? %>
+            <rect x="<%= bar[:x] %>" y="<%= bar[:y] %>" width="<%= bar[:w] %>" height="<%= bar[:h] %>" fill="#38bdf8" fill-opacity="<%= bar[:point].partial ? 0.45 : 1 %>" />
+          <% end %>
+          <% if bar[:label] %>
+            <text x="<%= bar[:slot_x] + bar[:slot_w] / 2 %>" y="<%= layout[:baseline] + 18 %>" text-anchor="middle" font-size="11" fill="#94a3b8"><%= bar[:label] %></text>
+          <% end %>
+        </g>
+      <% end %>
+      <line x1="<%= layout[:plot][:x] %>" x2="<%= layout[:plot][:x] + layout[:plot][:w] %>" y1="<%= layout[:baseline] %>" y2="<%= layout[:baseline] %>" stroke="#334155" stroke-width="1" />
+    </svg>
+    <div data-chart-target="tooltip" hidden data-testid="chart-tooltip"
+         class="pointer-events-none absolute z-20 w-max max-w-xs whitespace-pre-line rounded-md border border-slate-700 bg-slate-800 px-2 py-1 text-xs leading-snug text-slate-200 shadow-lg"></div>
+  </div>
 </section>
