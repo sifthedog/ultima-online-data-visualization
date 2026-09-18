@@ -21,6 +21,10 @@ module SkillAttempts
     GENERIC_RESOURCE_NAMES = %w[ore ingots logs boards].freeze
     # Legion names a chopped stack "Log", and a board stack whose tooltip never arrived by its graphic.
     RAW_NAMES = { "log" => "logs", "0x1bd7" => "boards" }.freeze
+    # A gathering row's `used` is the tool, which says nothing about what was gathered, so these
+    # skills name themselves by their yield instead. A swing that produced nothing falls back to
+    # the generic noun it was after.
+    GATHERING_FALLBACKS = { "Mining" => "ore", "Lumberjacking" => "logs" }.freeze
 
     # Stacked items report their client tooltip as their name (e.g. "1082 Ingots"), which bakes
     # the stack size into the name; ore is unaffected because Legion resolves its name itself.
@@ -91,6 +95,9 @@ module SkillAttempts
       return unless row["skill"] == "Lumberjacking" && row["outcome"] == "failed" && row["consumed"].present?
 
       row["outcome"] = "converted"
+      # Cutting is 1:1, the ratio every well-recorded conversion shows. The boards are dropped from
+      # the material tally either way; they exist here only to name the attempt.
+      row["gained"] ||= row["consumed"].map { |item| item.merge("name" => "boards") }
     end
 
     def insert(rows)
@@ -127,8 +134,18 @@ module SkillAttempts
         skill_to: row["to"],
         outcome: row["outcome"],
         gain_path: row["gain_path"],
-        subject: row["used"]
+        subject: subject_for(row)
       }
+    end
+
+    def subject_for(row)
+      return row["used"] unless GATHERING_FALLBACKS.key?(row["skill"])
+
+      # The raw yield, not material_attributes: its board filter would leave conversions unnamed.
+      produced = Array(row["gained"]).first
+      return GATHERING_FALLBACKS.fetch(row["skill"]) unless produced
+
+      self.class.normalize_material_name(produced["name"], hue: produced["hue"] || 0)
     end
 
     def material_attributes(row, attempt_id, key)

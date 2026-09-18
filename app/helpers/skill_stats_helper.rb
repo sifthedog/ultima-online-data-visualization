@@ -14,7 +14,7 @@ module SkillStatsHelper
     material_total_harvested: "Expected quantity gathered travelling the covered range once, based on how much was gathered per skill gain at each covered step.",
     material_per_point_harvested: "Expected quantity divided by covered skill points — the average amount gathered per 1.0 point of progress.",
     chart_points: "Each bar sums attempts ÷ gains over a whole skill point's covered steps. Faded bars are scaled up from a partially covered point, so treat them as rougher estimates.",
-    subject_column: "What was being made, cast, dug, or smelted for this row's attempts (e.g. bow vs crossbow).",
+    subject_column: "What this row's attempts were about: for crafting and casting the thing being made or cast (e.g. bow vs crossbow), for gathering the thing produced (e.g. iron ore vs ingots).",
     attempts_column: "Raw count of recorded skill-attempt rows for this subject within the selected range.",
     coverage: "Share of steps with at least one recorded skill gain. Only covered steps feed into the expected-attempts estimate.",
     tier_items: "Each item's unbroken run of skill points with a recorded gain, one row per run. Attempts and materials per point are recomputed over the whole run, not averaged from the individual points; expand a row to see those individual points."

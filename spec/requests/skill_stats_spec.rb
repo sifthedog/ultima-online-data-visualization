@@ -65,8 +65,8 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).to include("Logs")
     expect(response.body).to include("Oak Logs")
     expect(response.body).to include('data-testid="gathered-per-point"')
-    expect(response.body).not_to include("Boards")
-    expect(response.body).not_to include('data-testid="consumed-materials"')
+    # Boards name the conversion in the subject filter, but no table counts them as wood gathered.
+    expect(response.body.scan(/data-testid="gathered-[a-z-]+".*?<\/section>/m).join).not_to include("Boards")
     expect(response.body).not_to include("Total Logs")
     expect(response.body).not_to include('data-testid="subjects"')
     expect(response.body).not_to include('data-testid="tiers"')

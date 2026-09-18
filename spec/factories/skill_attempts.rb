@@ -34,7 +34,7 @@ FactoryBot.define do
       skill_from { 79.0 }
       skill_to { 79.1 }
       outcome { :dug }
-      subject { "pickaxe" }
+      subject { "iron ore" }
     end
 
     trait :smelted do
@@ -42,7 +42,7 @@ FactoryBot.define do
       skill_from { 79.1 }
       skill_to { 79.1 }
       outcome { :smelted }
-      subject { "fire beetle" }
+      subject { "ingots" }
     end
 
     trait :lumberjacking do
@@ -50,7 +50,7 @@ FactoryBot.define do
       skill_from { 10.5 }
       skill_to { 10.6 }
       outcome { :chopped }
-      subject { "axe" }
+      subject { "logs" }
     end
 
     trait :converted do
@@ -58,6 +58,7 @@ FactoryBot.define do
       skill_from { 10.7 }
       skill_to { 10.7 }
       outcome { :converted }
+      subject { "boards" }
     end
 
     trait :hiding do

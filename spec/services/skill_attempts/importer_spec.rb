@@ -135,7 +135,7 @@ RSpec.describe SkillAttempts::Importer do
     attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/32")
 
     expect(attempt).to have_attributes(
-      skill: "mining", outcome: "dug", skill_from: 79.0, skill_to: 79.1, subject: "pickaxe"
+      skill: "mining", outcome: "dug", skill_from: 79.0, skill_to: 79.1, subject: "iron ore"
     )
     expect(attempt).to be_success
     expect(attempt.consumed_materials).to be_empty
@@ -148,7 +148,7 @@ RSpec.describe SkillAttempts::Importer do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/36")
 
-    expect(attempt).to have_attributes(outcome: "failed", skill_from: 79.2, skill_to: 79.2)
+    expect(attempt).to have_attributes(outcome: "failed", skill_from: 79.2, skill_to: 79.2, subject: "ore")
     expect(attempt).not_to be_success
     expect(attempt.consumed_materials).to be_empty
     expect(attempt.gathered_materials).to be_empty
@@ -159,7 +159,7 @@ RSpec.describe SkillAttempts::Importer do
     attempt = SkillAttempt.find_by!(external_id: "0x1505877b/1789056730585/34")
 
     expect(attempt).to have_attributes(
-      skill: "mining", outcome: "smelted", skill_from: 79.1, skill_to: 79.1, subject: "fire beetle"
+      skill: "mining", outcome: "smelted", skill_from: 79.1, skill_to: 79.1, subject: "ingots"
     )
     expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "iron ore", quantity: 98)
@@ -171,7 +171,7 @@ RSpec.describe SkillAttempts::Importer do
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/31")
 
     expect(attempt).to have_attributes(
-      skill: "lumberjacking", outcome: "chopped", skill_from: 8.5, skill_to: 8.6, subject: "axe"
+      skill: "lumberjacking", outcome: "chopped", skill_from: 8.5, skill_to: 8.6, subject: "logs"
     )
     expect(attempt).to be_success
     expect(attempt.consumed_materials).to be_empty
@@ -182,7 +182,7 @@ RSpec.describe SkillAttempts::Importer do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/32")
 
-    expect(attempt).to have_attributes(outcome: "failed", skill_from: 8.6, skill_to: 8.6)
+    expect(attempt).to have_attributes(outcome: "failed", skill_from: 8.6, skill_to: 8.6, subject: "logs")
     expect(attempt).not_to be_success
     expect(attempt.consumed_materials).to be_empty
     expect(attempt.gathered_materials).to be_empty
@@ -192,7 +192,7 @@ RSpec.describe SkillAttempts::Importer do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789251360379/45")
 
-    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
+    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "oak boards")
     expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "oak logs", quantity: 50)
     expect(attempt.gathered_materials).to be_empty
@@ -202,9 +202,10 @@ RSpec.describe SkillAttempts::Importer do
     import
     attempt = SkillAttempt.find_by!(external_id: "0x154368cf/1789255957465/220")
 
-    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "axe")
+    expect(attempt).to have_attributes(skill: "lumberjacking", outcome: "converted", subject: "boards")
     expect(attempt).to be_success
     expect(attempt.consumed_materials.sole).to have_attributes(name: "logs", quantity: 80)
+    expect(attempt.gathered_materials).to be_empty
   end
 
   it "leaves a mining row the recorder called failed alone, since a failed smelt really does burn ore" do

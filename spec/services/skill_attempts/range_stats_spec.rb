@@ -182,7 +182,7 @@ RSpec.describe SkillAttempts::RangeStats do
   end
 
   it "normalizes gathered materials per swing, independent of skill gain" do
-    4.times { attempt(79.0, gained: false, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2) }
+    4.times { attempt(79.0, gained: false, skill: :mining, subject: "iron ore", boards: nil, outcome: :dug, ore: 2) }
 
     summary = stats(skill: :mining, from_tenths: 790, to_tenths: 791).summary
 
@@ -196,8 +196,8 @@ RSpec.describe SkillAttempts::RangeStats do
   end
 
   it "prices gathered materials per gain over covered steps, like consumption" do
-    attempt(79.0, gained: true, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2)
-    3.times { attempt(79.0, gained: false, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2) }
+    attempt(79.0, gained: true, skill: :mining, subject: "iron ore", boards: nil, outcome: :dug, ore: 2)
+    3.times { attempt(79.0, gained: false, skill: :mining, subject: "iron ore", boards: nil, outcome: :dug, ore: 2) }
 
     summary = stats(skill: :mining, from_tenths: 790, to_tenths: 800).summary
 
@@ -206,8 +206,8 @@ RSpec.describe SkillAttempts::RangeStats do
   end
 
   it "pools smelting consumption and mining gathering under the same skill without mixing subjects in the by-subject breakdown" do
-    attempt(79.0, gained: true, skill: :mining, subject: "pickaxe", boards: nil, outcome: :dug, ore: 2)
-    smelt = attempt(79.0, gained: false, skill: :mining, subject: "fire beetle", boards: nil, outcome: :smelted, ore: nil)
+    attempt(79.0, gained: true, skill: :mining, subject: "iron ore", boards: nil, outcome: :dug, ore: 2)
+    smelt = attempt(79.0, gained: false, skill: :mining, subject: "ingots", boards: nil, outcome: :smelted, ore: nil)
     create(:consumed_material, skill_attempt: smelt, name: "iron ore", quantity: 98)
     create(:gathered_material, skill_attempt: smelt, name: "98 Ingots", quantity: 49)
 
@@ -217,12 +217,12 @@ RSpec.describe SkillAttempts::RangeStats do
     expect(result.summary.harvest).to eq("iron ore" => 2.0, "98 Ingots" => 49.0)
     expect(result.summary.gathered).to eq("iron ore" => 1.0, "98 Ingots" => 24.5)
 
-    expect(result.by_subject["pickaxe"].consumption).to eq({})
-    expect(result.by_subject["pickaxe"].gathered).to eq("iron ore" => 2.0)
+    expect(result.by_subject["iron ore"].consumption).to eq({})
+    expect(result.by_subject["iron ore"].gathered).to eq("iron ore" => 2.0)
     # Smelting never raises skill on its own, so its own gain-based coverage is empty: the
-    # smelted ore only shows up in the pooled summary above thanks to the pickaxe swing's gain.
-    expect(result.by_subject["fire beetle"].consumption).to eq({})
-    expect(result.by_subject["fire beetle"].gathered).to eq("98 Ingots" => 49.0)
+    # smelted ore only shows up in the pooled summary above thanks to the digging swing's gain.
+    expect(result.by_subject["ingots"].consumption).to eq({})
+    expect(result.by_subject["ingots"].gathered).to eq("98 Ingots" => 49.0)
   end
 
   it "credits every step a single row climbed through" do
