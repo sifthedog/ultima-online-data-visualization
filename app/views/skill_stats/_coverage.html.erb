@@ -1,5 +1,5 @@
 <section class="space-y-2" data-testid="coverage">
-  <h2 class="text-xl font-semibold"><%= form.skill_label %> <%= skill_span(summary.from_tenths, summary.to_tenths) %><%= " · #{form.gain_path_label}" if form.chosen_gain_path %></h2>
+  <h2 class="text-xl font-semibold"><%= form.skill_label %> <%= skill_span(summary.from_tenths, summary.to_tenths) %><%= " · #{form.gain_path_label}" if form.chosen_gain_path %><%= " · #{form.subjects_label}" if form.chosen_subjects.any? %></h2>
   <% if summary.empty? %>
     <p class="rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-slate-300">No attempts recorded for this skill in this range.</p>
   <% else %>

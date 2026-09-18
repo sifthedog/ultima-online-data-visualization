@@ -37,8 +37,22 @@
             class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
     </div>
   </div>
+  <% if form.subject_options.any? %>
+    <div class="mt-4">
+      <%= f.label :subjects, class: "block text-sm font-medium text-slate-300" do %>
+        <span class="inline-flex items-center gap-1">Subjects<%= hint_for(:subject_column) %></span>
+      <% end %>
+      <%= f.select :subjects, form.subject_options.map { |subject| [ subject.titleize, subject ] },
+            { selected: form.chosen_subjects, include_hidden: false }, multiple: true, size: 5,
+            class: "mt-1 w-full rounded-md border border-slate-700 bg-slate-950 px-3 py-2 text-slate-100" %>
+      <p class="mt-1 text-xs text-slate-500">Leave empty for all subjects. Hold Cmd or Ctrl to pick several.</p>
+    </div>
+  <% end %>
   <div class="mt-4 flex items-center justify-between gap-4">
     <p class="text-xs text-slate-500">From is inclusive, to is exclusive: 60 to 70 covers the gains from 60.0 up to 70.0.</p>
-    <%= f.submit "Show", class: "rounded-md bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500" %>
+    <div class="flex items-center gap-4">
+      <%= link_to "Clear filters", root_path, class: "text-sm text-slate-400 underline hover:text-slate-200" if form.filled? %>
+      <%= f.submit "Show", class: "rounded-md bg-sky-600 px-4 py-2 font-medium text-white hover:bg-sky-500" %>
+    </div>
   </div>
 <% end %>

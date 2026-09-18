@@ -25,11 +25,12 @@ module SkillAttempts
     STEP = Arel.sql("(skill_attempts.skill_from * 10)::integer")
     GAINED_STEP = Arel.sql("gained.step")
 
-    def initialize(skill:, from_tenths:, to_tenths:, gain_path: nil)
+    def initialize(skill:, from_tenths:, to_tenths:, gain_path: nil, subjects: [])
       @skill = skill
       @from_tenths = from_tenths
       @to_tenths = to_tenths
       @gain_path = gain_path.presence
+      @subjects = Array(subjects)
     end
 
     def call
@@ -96,7 +97,9 @@ module SkillAttempts
 
     def by_skill
       relation = SkillAttempt.where(skill: @skill)
-      @gain_path ? relation.where(gain_path: @gain_path) : relation
+      relation = relation.where(gain_path: @gain_path) if @gain_path
+      relation = relation.where(subject: @subjects) if @subjects.any?
+      relation
     end
 
     # Attempts belong to the step they were made at

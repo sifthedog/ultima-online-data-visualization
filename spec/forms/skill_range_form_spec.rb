@@ -49,7 +49,19 @@ RSpec.describe SkillRangeForm do
 
   it "offers every gain path under the shard's name and ignores one it has not been taught" do
     expect(described_class.new(gain_path: "legacy").gain_path_options).to eq([ [ "Legacy", "legacy" ], [ "Modern", "modern" ], [ "Perilous", "perilous" ] ])
-    expect(described_class.new(skill: "mysticism", gain_path: "legacy").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: "legacy")
-    expect(described_class.new(skill: "mysticism", gain_path: "sideways").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: nil)
+    expect(described_class.new(skill: "mysticism", gain_path: "legacy").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: "legacy", subjects: [])
+    expect(described_class.new(skill: "mysticism", gain_path: "sideways").to_query).to eq(skill: "mysticism", from_tenths: 0, to_tenths: 1200, gain_path: nil, subjects: [])
+  end
+
+  it "offers only the subjects recorded for the chosen skill and drops the rest" do
+    create(:skill_attempt, subject: "crossbow")
+    create(:skill_attempt, subject: "bow")
+    create(:skill_attempt, :mining, subject: "iron ore")
+
+    form = described_class.new(skill: "bowcraft_fletching", subjects: [ "bow", "iron ore", "" ])
+
+    expect(form.subject_options).to eq([ "bow", "crossbow" ])
+    expect(form.chosen_subjects).to eq([ "bow" ])
+    expect(form.subjects_label).to eq("Bow")
   end
 end

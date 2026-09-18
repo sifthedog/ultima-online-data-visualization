@@ -9,6 +9,7 @@ class SkillRangeForm
   attribute :from, :decimal, default: MIN
   attribute :to, :decimal, default: MAX
   attribute :gain_path, :string
+  attribute :subjects, default: -> { [] }
 
   validates :skill, inclusion: { in: ->(_) { SkillAttempt.skills.keys }, message: "is not a known skill" }
   validates :from, :to, presence: true, numericality: { greater_than_or_equal_to: MIN, less_than_or_equal_to: MAX }
@@ -29,7 +30,16 @@ class SkillRangeForm
 
   def gain_path_label = SkillAttempt.gain_paths[chosen_gain_path]
 
-  def to_query = { skill:, from_tenths:, to_tenths:, gain_path: chosen_gain_path }
+  # Subject is free text, so the recorded values are the whitelist.
+  def subject_options
+    @subject_options ||= skill.present? ? SkillAttempt.where(skill:).distinct.order(:subject).pluck(:subject) : []
+  end
+
+  def chosen_subjects = @chosen_subjects ||= Array(subjects).compact_blank & subject_options
+
+  def subjects_label = chosen_subjects.map(&:titleize).to_sentence
+
+  def to_query = { skill:, from_tenths:, to_tenths:, gain_path: chosen_gain_path, subjects: chosen_subjects }
 
   private
 

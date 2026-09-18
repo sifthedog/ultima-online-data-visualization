@@ -101,6 +101,23 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).to include("· Legacy")
   end
 
+  it "narrows to the chosen subjects and ignores subjects that were never recorded" do
+    create(:skill_attempt, subject: "bow")
+    create(:skill_attempt, skill_from: 31.2, skill_to: 31.3, subject: "crossbow")
+
+    get root_path(skill: "bowcraft_fletching", from: "31", to: "32", subjects: [ "crossbow" ])
+
+    expect(response).to have_http_status(:ok)
+    expect(response.body).to include("· Crossbow")
+    expect(response.body).to include("1 of 10")
+    expect(response.body).not_to include(%(data-testid="subjects"))
+
+    get root_path(skill: "bowcraft_fletching", from: "31", to: "32", subjects: [ "nonsense" ])
+
+    expect(response.body).not_to include("· Nonsense")
+    expect(response.body).to include("2 of 10")
+  end
+
   it "shows spellweaving by spell, with no materials to report" do
     create(:skill_attempt, :spellweaving)
     create(:skill_attempt, :spellweaving, skill_from: 45.1, skill_to: 45.2, subject: "Wildfire")
@@ -113,6 +130,16 @@ RSpec.describe "Skill stats", type: :request do
     expect(response.body).to include("Wildfire")
     expect(response.body).to include("No materials recorded.")
     expect(response.body).not_to include('data-testid="gathered-materials"')
+  end
+
+  it "offers a way back to an empty form once a skill is chosen" do
+    get root_path
+
+    expect(response.body).not_to include("Clear filters")
+
+    get root_path(skill: "magery")
+
+    expect(response.body).to include("Clear filters")
   end
 
   it "says so when the skill has no data in the range" do
