@@ -5,7 +5,7 @@ gem "rails", "~> 8.1.3", ">= 8.1.3.1"
 # The modern asset pipeline for Rails [https://github.com/rails/propshaft]
 gem "propshaft"
 # Use postgresql as the database for Active Record
-gem "pg", "~> 1.1"
+gem "pg", "~> 1.7"
 
 # json 3.0 made JSON.parse options keyword-only, which breaks ActiveSupport 8.1.3's session cookie decoding
 # (every request that carries a session cookie 500s). Drop the pin once Rails passes options as keywords.
