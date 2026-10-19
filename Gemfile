@@ -9,7 +9,7 @@ gem "pg", "~> 1.1"
 
 # json 3.0 made JSON.parse options keyword-only, which breaks ActiveSupport 8.1.3's session cookie decoding
 # (every request that carries a session cookie 500s). Drop the pin once Rails passes options as keywords.
-gem "json", "< 3"
+gem "json", "< 4"
 # Use the Puma web server [https://github.com/puma/puma]
 gem "puma", ">= 5.0"
 # Use JavaScript with ESM import maps [https://github.com/rails/importmap-rails]
